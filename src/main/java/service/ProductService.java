@@ -1,3 +1,3 @@
-public class ProductService{
+public interface ProductService{
     
 }
