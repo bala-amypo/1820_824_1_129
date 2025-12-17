@@ -1,3 +1,3 @@
-public class BundleRuleService {
+public interface BundleRuleService {
     
 }
