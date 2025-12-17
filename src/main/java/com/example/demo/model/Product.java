@@ -46,5 +46,5 @@ public class Product {
         this.createdAt = LocalDateTime.now();
     }
 
-    // getters and setters
+    
 }
