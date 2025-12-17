@@ -25,7 +25,7 @@ public class BundleRule {
     private String ruleName;
 
     @Column(nullable = false)
-    private String requiredProductIds; // CSV: "1,2,3"
+    private String requiredProductIds; 
 
     @Column(nullable = false)
     private Double discountPercentage;
