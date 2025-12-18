@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.BundleRule;
 import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
@@ -9,7 +10,6 @@ import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.DiscountApplicationRepository;
 import com.example.demo.service.DiscountService;
-import com.example.demo.exception.ResourceNotFoundException;
 
 import org.springframework.stereotype.Service;
 
@@ -39,14 +39,18 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         List<CartItem> items = cartItemRepository.findByCart(cart);
+
+        // All product IDs in cart
         Set<Long> productIds = items.stream()
-                .map(i -> i.getProduct().getId())
+                .map(item -> item.getProduct().getId())
                 .collect(Collectors.toSet());
 
+        // Active bundle rules
         List<BundleRule> rules = bundleRuleRepository.findByActiveTrue();
 
         return rules.stream()
@@ -55,43 +59,54 @@ public class DiscountServiceImpl implements DiscountService {
                 .toList();
     }
 
-    private boolean containsAllProducts(String csv, Set<Long> productIds) {
-        for (String id : csv.split(",")) {
-            if (!productIds.contains(Long.parseLong(id.trim()))) {
-                return false;
-            }
-        }
-        return true;
+    /**
+     * Checks whether all required product IDs of a rule
+     * are present in the cart product IDs.
+     */
+    private boolean containsAllProducts(List<Long> requiredProductIds, Set<Long> cartProductIds) {
+        return cartProductIds.containsAll(requiredProductIds);
     }
 
-    private DiscountApplication applyDiscount(Cart cart, BundleRule rule, List<CartItem> items) {
+    /**
+     * Applies discount rule to cart and stores the result.
+     */
+    private DiscountApplication applyDiscount(
+            Cart cart,
+            BundleRule rule,
+            List<CartItem> items) {
+
         BigDecimal total = items.stream()
-                .map(i -> i.getProduct().getPrice()
-                        .multiply(BigDecimal.valueOf(i.getQuantity())))
+                .map(item ->
+                        item.getProduct().getPrice()
+                                .multiply(BigDecimal.valueOf(item.getQuantity()))
+                )
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal discount = total
                 .multiply(BigDecimal.valueOf(rule.getDiscountPercentage()))
                 .divide(BigDecimal.valueOf(100));
 
-        DiscountApplication da = new DiscountApplication();
-        da.setCart(cart);
-        da.setBundleRule(rule);
-        da.setDiscountAmount(discount);
+        DiscountApplication application = new DiscountApplication();
+        application.setCart(cart);
+        application.setBundleRule(rule);
+        application.setDiscountAmount(discount);
 
-        return discountApplicationRepository.save(da);
+        return discountApplicationRepository.save(application);
     }
 
     @Override
     public DiscountApplication getApplicationById(Long id) {
         return discountApplicationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("DiscountApplication not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("DiscountApplication not found"));
     }
 
     @Override
     public List<DiscountApplication> getApplicationsForCart(Long cartId) {
+
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
         return discountApplicationRepository.findByCart(cart);
     }
 }
