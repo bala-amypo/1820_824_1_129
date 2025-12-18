@@ -34,4 +34,6 @@ public class CartItem {
             throw new RuntimeException("Quantity must be positive");
         }
     }
+
+    // getters and setters
 }

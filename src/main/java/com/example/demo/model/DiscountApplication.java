@@ -36,4 +36,5 @@ public class DiscountApplication {
         this.appliedAt = LocalDateTime.now();
     }
 
+    // getters and setters
 }

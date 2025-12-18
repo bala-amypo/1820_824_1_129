@@ -41,4 +41,5 @@ public class Cart {
         this.updatedAt = LocalDateTime.now();
     }
 
+    // getters and setters
 }
