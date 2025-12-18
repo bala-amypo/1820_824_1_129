@@ -4,16 +4,11 @@ import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.AuthResponse;
 import com.example.demo.service.AuthService;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
-
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
-@Tag(name = "Authentication")
+@RequestMapping("/auth")
 public class AuthController {
 
     private final AuthService authService;
@@ -23,12 +18,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public void register(@RequestBody AuthRequest request) {
+    public ResponseEntity<String> register(@RequestBody AuthRequest request) {
         authService.register(request);
+        return ResponseEntity.ok("User registered successfully");
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        return authService.login(request);
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
