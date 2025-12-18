@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface DiscountApplicationRepository extends JpaRepository<DiscountApplication, Long> {
 
-    List<DiscountApplication> findByCart(Cart cart);
+    List<DiscountApplication> findByCartId(Cart cartId);
 }
