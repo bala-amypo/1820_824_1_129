@@ -26,6 +26,5 @@ public class BundleRule {
     private List<Long> requiredProductIds;
 
     private Double discountPercentage;
-
     private Boolean active;
 }
