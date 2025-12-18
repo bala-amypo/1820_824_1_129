@@ -24,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public void register(@RequestBody RegisterRequest request) {
+    public void register(@RequestBody AuthRequest request) {
         authService.register(request);
     }
 
