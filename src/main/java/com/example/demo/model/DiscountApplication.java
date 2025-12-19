@@ -6,14 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 
-@Entity
-@Getter
-@Setter
 public class DiscountApplication {
 
     @Id
