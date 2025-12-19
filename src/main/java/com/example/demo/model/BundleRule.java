@@ -14,7 +14,7 @@ public class BundleRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @column(unique=true)
+    @Column(unique=true)
     private String ruleName;
 
     @ElementCollection
