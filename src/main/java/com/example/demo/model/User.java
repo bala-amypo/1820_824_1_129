@@ -15,5 +15,12 @@ public class User {
     @Column(unique=true)
     private String email;
     private String password;
-    public 
+    public User(){
+    }
+    public long getId(){
+        return Id;
+    }
+    public void setId{
+        this.Id=id;
+    }
 }
