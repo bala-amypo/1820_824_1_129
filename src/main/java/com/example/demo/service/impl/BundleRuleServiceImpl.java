@@ -9,53 +9,50 @@ import java.util.List;
 
 public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private final BundleRuleRepository bundleRuleRepository;
+    private final BundleRuleRepository repository;
 
-    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
-        this.bundleRuleRepository = bundleRuleRepository;
+    public BundleRuleServiceImpl(BundleRuleRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public BundleRule createRule(BundleRule rule) {
-        validateRule(rule);
+        validate(rule);
         rule.setActive(true);
-        return bundleRuleRepository.save(rule);
+        return repository.save(rule);
     }
 
     @Override
     public BundleRule updateRule(Long id, BundleRule rule) {
         BundleRule existing = getRuleById(id);
-        validateRule(rule);
+        validate(rule);
         existing.setRuleName(rule.getRuleName());
         existing.setRequiredProductIds(rule.getRequiredProductIds());
         existing.setDiscountPercentage(rule.getDiscountPercentage());
-        return bundleRuleRepository.save(existing);
+        return repository.save(existing);
     }
 
     @Override
     public BundleRule getRuleById(Long id) {
-        return bundleRuleRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("BundleRule not found"));
     }
 
     @Override
     public List<BundleRule> getActiveRules() {
-        return bundleRuleRepository.findByActiveTrue();
+        return repository.findByActiveTrue();
     }
 
     @Override
     public void deactivateRule(Long id) {
         BundleRule rule = getRuleById(id);
         rule.setActive(false);
-        bundleRuleRepository.save(rule);
+        repository.save(rule);
     }
 
-    private void validateRule(BundleRule rule) {
+    private void validate(BundleRule rule) {
         if (rule.getDiscountPercentage() < 0 || rule.getDiscountPercentage() > 100) {
             throw new IllegalArgumentException("Discount must be between 0 and 100");
-        }
-        if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().trim().isEmpty()) {
-            throw new IllegalArgumentException("Required products cannot be empty");
         }
     }
 }
