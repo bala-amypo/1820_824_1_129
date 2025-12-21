@@ -25,43 +25,43 @@ public class BundleRule {
     private Double discountPercentage;
     private Boolean active;
 
-    // ===== Getters =====
+    public BundleRule() {
+    }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getRuleName() {
         return ruleName;
     }
 
-    public List<Long> getRequiredProductIds() {
-        return requiredProductIds;
-    }
-
-    public Double getDiscountPercentage() {
-        return discountPercentage;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
+    }
+
+    public List<Long> getRequiredProductIds() {
+        return requiredProductIds;
     }
 
     public void setRequiredProductIds(List<Long> requiredProductIds) {
         this.requiredProductIds = requiredProductIds;
     }
 
+    public Double getDiscountPercentage() {
+        return discountPercentage;
+    }
+
     public void setDiscountPercentage(Double discountPercentage) {
         this.discountPercentage = discountPercentage;
+    }
+
+    public Boolean getActive() {
+        return active;
     }
 
     public void setActive(Boolean active) {
