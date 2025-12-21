@@ -1,11 +1,11 @@
 package com.example.demo.service.impl;
-
+import org.springframework.stereotype.service;
 import com.example.demo.model.Cart;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.service.CartService;
 
 import jakarta.persistence.EntityNotFoundException;
-
+@Service
 public class CartServiceImpl implements CartService {
 
     private final CartRepository repository;
