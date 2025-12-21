@@ -5,5 +5,5 @@ import com.example.demo.dto.AuthResponse;
 
 public interface AuthService {
 
-    AuthResponse login(AuthRequest request);
+     login(AuthRequest request);
 }
