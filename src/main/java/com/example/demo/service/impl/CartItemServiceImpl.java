@@ -1,5 +1,5 @@
 package com.example.demo.service.impl;
-import org.springframework.stereotype.service;
+import org.springframework.stereotype.Service;
 import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
 import com.example.demo.model.Product;

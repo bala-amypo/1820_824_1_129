@@ -1,14 +1,25 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.BundleRule;
+import com.example.demo.model.Cart;
+import com.example.demo.model.CartItem;
+import com.example.demo.model.DiscountApplication;
+
+import com.example.demo.repository.BundleRuleRepository;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.repository.CartRepository;
+import com.example.demo.repository.DiscountApplicationRepository;
+
 import com.example.demo.service.DiscountService;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.stereotype.service;
+
+import org.springframework.stereotype.Service;
+
 @Service
 public class DiscountServiceImpl implements DiscountService {
 
@@ -40,6 +51,7 @@ public class DiscountServiceImpl implements DiscountService {
 
         for (BundleRule rule : rules) {
             BigDecimal total = BigDecimal.ZERO;
+
             for (CartItem item : items) {
                 total = total.add(
                         item.getProduct().getPrice()
@@ -52,19 +64,23 @@ public class DiscountServiceImpl implements DiscountService {
                 app.setCart(cart);
                 app.setBundleRule(rule);
                 app.setDiscountAmount(
-                        total.multiply(BigDecimal.valueOf(rule.getDiscountPercentage() / 100))
+                        total.multiply(
+                                BigDecimal.valueOf(rule.getDiscountPercentage() / 100)
+                        )
                 );
                 app.setAppliedAt(LocalDateTime.now());
                 discountRepo.save(app);
             }
         }
+
         return discountRepo.findByCartId(cartId);
     }
 
     @Override
     public DiscountApplication getApplicationById(Long id) {
         return discountRepo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("DiscountApplication not found"));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("DiscountApplication not found"));
     }
 
     @Override
