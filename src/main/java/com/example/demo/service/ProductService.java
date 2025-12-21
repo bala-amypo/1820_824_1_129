@@ -2,6 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.model.Product;
 
+import java.util.list;
+
 public interface ProductService {
 
     Product createProduct(Product product);
@@ -10,7 +12,7 @@ public interface ProductService {
 
     Product getProductById(Long id);
 
-    Product getAllProducts();
+    List<Product> getAllProducts();
 
     void deactivateProduct(Long id);
 }
