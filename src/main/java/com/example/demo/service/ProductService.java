@@ -10,5 +10,7 @@ public interface ProductService {
 
     Product getProductById(Long id);
 
+    Product getAllProducts();
+
     void deactivateProduct(Long id);
 }
