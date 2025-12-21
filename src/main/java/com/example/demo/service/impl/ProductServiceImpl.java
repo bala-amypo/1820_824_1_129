@@ -3,13 +3,10 @@ package com.example.demo.service.impl;
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.ProductService;
-import com.example.demo.exception.ResourceNotFoundException;
 
-import org.springframework.stereotype.Service;
-
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
-@Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -20,9 +17,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(Product product) {
-        if (productRepository.existsBySku(product.getSku())) {
-            throw new RuntimeException("SKU already exists");
+        if (productRepository.findBySku(product.getSku()).isPresent()) {
+            throw new IllegalArgumentException("SKU already exists");
         }
+        if (product.getPrice().doubleValue() <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
+        }
+        product.setActive(true);
         return productRepository.save(product);
     }
 
@@ -30,16 +31,14 @@ public class ProductServiceImpl implements ProductService {
     public Product updateProduct(Long id, Product product) {
         Product existing = getProductById(id);
         existing.setName(product.getName());
-        existing.setCategory(product.getCategory());
         existing.setPrice(product.getPrice());
-        existing.setActive(product.getActive());
         return productRepository.save(existing);
     }
 
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
     @Override
