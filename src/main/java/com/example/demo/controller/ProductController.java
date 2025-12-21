@@ -5,13 +5,13 @@ import com.example.demo.service.ProductService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -20,34 +20,34 @@ import java.util.List;
 @Tag(name = "Products")
 public class ProductController {
 
-    private final ProductService productService;
+    private final ProductService service;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
     @PostMapping
     public Product create(@RequestBody Product product) {
-        return productService.createProduct(product);
+        return service.createProduct(product);
     }
 
     @PutMapping("/{id}")
     public Product update(@PathVariable Long id, @RequestBody Product product) {
-        return productService.updateProduct(id, product);
+        return service.updateProduct(id, product);
     }
 
     @GetMapping("/{id}")
     public Product get(@PathVariable Long id) {
-        return productService.getProductById(id);
+        return service.getProductById(id);
     }
 
     @GetMapping
     public List<Product> list() {
-        return productService.getAllProducts();
+        return service.getAllProducts();
     }
 
     @PutMapping("/{id}/deactivate")
     public void deactivate(@PathVariable Long id) {
-        productService.deactivateProduct(id);
+        service.deactivateProduct(id);
     }
 }
