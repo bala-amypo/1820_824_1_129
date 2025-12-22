@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 
 import java.util.List;
 
+
 @Entity
 public class BundleRule {
 

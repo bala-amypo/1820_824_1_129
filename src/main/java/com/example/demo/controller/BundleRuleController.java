@@ -35,6 +35,7 @@ public class BundleRuleController {
     public BundleRule update(@PathVariable Long id, @RequestBody BundleRule rule) {
         return service.updateRule(id, rule);
     }
+    
 
     @GetMapping("/{id}")
     public BundleRule get(@PathVariable Long id) {
