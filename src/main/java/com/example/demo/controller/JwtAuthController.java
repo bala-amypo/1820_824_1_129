@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +14,8 @@ public class JwtAuthController {
     private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
-            @RequestParam String email,
-            @RequestParam String role,
-            @RequestParam Long userId) {
-        String token = jwtTokenProvider.generateToken(email, role, userId);
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
+        String token = jwtTokenProvider.generateToken(dto.getEmail(), dto.getRole(), dto.getUserId());
         return ResponseEntity.ok(token);
     }
 
