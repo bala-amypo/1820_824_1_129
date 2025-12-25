@@ -24,7 +24,7 @@
     </properties>
 
     <dependencies>
-
+        <!-- Original Dependencies (UNCHANGED) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -53,6 +53,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- NEW: TestNG for your test annotations (FIXES compilation errors) -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.10.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
