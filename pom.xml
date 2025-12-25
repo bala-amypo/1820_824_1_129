@@ -23,6 +23,7 @@
 
     <properties>
         <java.version>17</java.version>
+        <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
     </properties>
 
     <dependencies>
@@ -72,7 +73,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ADD THIS: brings in spring-test (MockHttpServletRequest/Response), assertions, etc. -->
+        <!-- Needed for MockHttpServletRequest/MockHttpServletResponse in your TestNG tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -99,5 +100,21 @@
         </dependency>
 
     </dependencies>
+
+    <!-- Minimal addition: force Surefire to run TestNG suite -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.plugin.version}</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
