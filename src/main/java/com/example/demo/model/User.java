@@ -42,7 +42,7 @@ public class User {
         return password;
     }
 
-    public void setPassword(String password) {   // ✅ FIXED
+    public void setPassword(String password) {  
         this.password = password;
     }
 
