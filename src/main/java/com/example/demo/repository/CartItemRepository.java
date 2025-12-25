@@ -10,13 +10,16 @@ import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
-    // cart.id
-    List<CartItem> findByCart_Id(Long cartId);
+    // FIX: cartId is not a field in CartItem, so use ci.cart.id
+    @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId")
+    List<CartItem> findByCartId(@Param("cartId") Long cartId);
 
-    // cart.id AND product.id
-    Optional<CartItem> findByCart_IdAndProduct_Id(Long cartId, Long productId);
+    // FIX: productId is not a field in CartItem, so use ci.product.id
+    @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId")
+    Optional<CartItem> findByCartIdAndProductId(@Param("cartId") Long cartId,
+                                                @Param("productId") Long productId);
 
-    // cart.id AND quantity >= ?
+    // FIX: minQuantity is not a field, it's just a parameter for quantity comparison
     @Query("SELECT ci FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.quantity >= :minQuantity")
     List<CartItem> findByCartIdAndMinQuantity(@Param("cartId") Long cartId,
                                               @Param("minQuantity") Integer minQuantity);
