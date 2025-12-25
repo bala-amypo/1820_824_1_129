@@ -1,33 +1,76 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 
 @Entity
-public class CartItem {
+@Table(name = "cart_items")
+public class CartItem implements Serializable {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false)
     private Cart cart;
     
-    @ManyToOne
-    @JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
     
-    private Integer quantity;
+    @Column(nullable = false)
+    private Integer quantity = 1;
+    
+    // Default constructor
+    public CartItem() {}
+    
+    // Constructor with cart, product, quantity
+    public CartItem(Cart cart, Product product, Integer quantity) {
+        this.cart = cart;
+        this.product = product;
+        this.quantity = quantity;
+    }
     
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
     
-    public Cart getCart() { return cart; }
-    public void setCart(Cart cart) { this.cart = cart; }
+    public void setId(Long id) {
+        this.id = id;
+    }
     
-    public Product getProduct() { return product; }
-    public void setProduct(Product product) { this.product = product; }
+    public Cart getCart() {
+        return cart;
+    }
     
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
+    
+    public Product getProduct() {
+        return product;
+    }
+    
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+    
+    public Integer getQuantity() {
+        return quantity;
+    }
+    
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+    
+    // Helper method for tests
+    public Long getCartId() {
+        return cart != null ? cart.getId() : null;
+    }
+    
+    public Long getProductId() {
+        return product != null ? product.getId() : null;
+    }
 }
