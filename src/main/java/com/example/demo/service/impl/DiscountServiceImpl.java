@@ -1,11 +1,20 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.;
-import com.example.demo.repository.;
+import com.example.demo.model.BundleRule;
+import com.example.demo.model.Cart;
+import com.example.demo.model.CartItem;
+import com.example.demo.model.DiscountApplication;
+import com.example.demo.repository.BundleRuleRepository;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.repository.CartRepository;
+import com.example.demo.repository.DiscountApplicationRepository;
 import com.example.demo.service.DiscountService;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +49,7 @@ public List<DiscountApplication> evaluateDiscounts(Long cartId) {
         return List.of();
     }
 
-    Set<Long> cartProducts = items.stream()
+    Set<Long> cartProductIds = items.stream()
             .map(i -> i.getProduct().getId())
             .collect(Collectors.toSet());
 
@@ -48,18 +57,20 @@ public List<DiscountApplication> evaluateDiscounts(Long cartId) {
 
     for (BundleRule rule : bundleRuleRepository.findAll()) {
 
-        if (!rule.getActive()) continue;
+        if (!rule.getActive()) {
+            continue;
+        }
 
-        Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
+        Set<Long> requiredIds = Arrays.stream(rule.getRequiredProductIds().split(","))
                 .map(String::trim)
                 .map(Long::valueOf)
                 .collect(Collectors.toSet());
 
-        if (cartProducts.containsAll(required)) {
-            DiscountApplication da = new DiscountApplication();
-            da.setCart(cart);
-            da.setBundleRule(rule);
-            results.add(da);
+        if (cartProductIds.containsAll(requiredIds)) {
+            DiscountApplication app = new DiscountApplication();
+            app.setCart(cart);
+            app.setBundleRule(rule);
+            results.add(app);
         }
     }
 
