@@ -8,6 +8,7 @@ import com.example.demo.repository.BundleRuleRepository;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.DiscountApplicationRepository;
+import com.example.demo.service.DiscountService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DiscountServiceImpl {
+public class DiscountServiceImpl implements DiscountService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
@@ -37,6 +38,7 @@ public class DiscountServiceImpl {
         this.discountApplicationRepository = discountApplicationRepository;
     }
 
+    @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
 
         Cart cart = cartRepository.findById(cartId).orElseThrow();
