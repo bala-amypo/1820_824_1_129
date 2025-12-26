@@ -20,8 +20,7 @@ public class SecurityConfig {
             )
 
             .formLogin(form -> form
-                .loginPage("/")
-                .loginProcessingUrl("/login")
+                .loginPage("/")                 // root URL
                 .defaultSuccessUrl("/swagger-ui/index.html", true)
                 .permitAll()
             )
