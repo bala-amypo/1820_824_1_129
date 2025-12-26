@@ -2,12 +2,13 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
+import com.example.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ProductServiceImpl {
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
@@ -15,6 +16,7 @@ public class ProductServiceImpl {
         this.productRepository = productRepository;
     }
 
+    @Override
     public Product createProduct(Product product) {
         if (product.getPrice() == null ||
             product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
@@ -29,6 +31,7 @@ public class ProductServiceImpl {
         return productRepository.save(product);
     }
 
+    @Override
     public Product updateProduct(Long id, Product product) {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
@@ -38,14 +41,16 @@ public class ProductServiceImpl {
         return productRepository.save(existing);
     }
 
+    @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
+    @Override
     public void deactivateProduct(Long id) {
-        Product p = getProductById(id);
-        p.setActive(false);
-        productRepository.save(p);
+        Product product = getProductById(id);
+        product.setActive(false);
+        productRepository.save(product);
     }
 }
