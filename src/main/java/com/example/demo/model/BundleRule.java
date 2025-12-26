@@ -1,33 +1,43 @@
 package com.example.demo.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
 public class BundleRule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String ruleName;
+
+    @Column(nullable = false)
     private String requiredProductIds;
+
     private Double discountPercentage;
-    
-    @Column(columnDefinition = "boolean default true")
+
     private Boolean active = true;
-    
-    // Getters and Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    
+
     public String getRuleName() { return ruleName; }
     public void setRuleName(String ruleName) { this.ruleName = ruleName; }
-    
+
     public String getRequiredProductIds() { return requiredProductIds; }
-    public void setRequiredProductIds(String requiredProductIds) { this.requiredProductIds = requiredProductIds; }
-    
+    public void setRequiredProductIds(String requiredProductIds) {
+        this.requiredProductIds = requiredProductIds;
+    }
+
     public Double getDiscountPercentage() { return discountPercentage; }
-    public void setDiscountPercentage(Double discountPercentage) { this.discountPercentage = discountPercentage; }
-    
+    public void setDiscountPercentage(Double discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
 }
