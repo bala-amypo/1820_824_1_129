@@ -11,19 +11,24 @@ import com.example.demo.service.CartItemService;
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
-    private final CartItemRepository cartItemRepository;
+    private final CartItemRepository repository;
 
-    public CartItemServiceImpl(CartItemRepository cartItemRepository) {
-        this.cartItemRepository = cartItemRepository;
+    public CartItemServiceImpl(CartItemRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public CartItem save(CartItem item) {
+        return repository.save(item);
     }
 
     @Override
     public List<CartItem> getItems(Long cartId) {
-        return cartItemRepository.findByCartId(cartId);
+        return repository.findByCartId(cartId);
     }
 
     @Override
     public List<CartItem> getByCartIdAndMinQuantity(Long cartId, int minQuantity) {
-        return cartItemRepository.findByCartIdAndMinQuantity(cartId, minQuantity);
+        return repository.findByCartIdAndMinQuantity(cartId, minQuantity);
     }
 }
