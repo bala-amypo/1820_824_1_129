@@ -21,4 +21,9 @@ public class CartItemServiceImpl implements CartItemService {
     public List<CartItem> getItems(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
+
+    @Override
+    public List<CartItem> getByCartIdAndMinQuantity(Long cartId, int minQuantity) {
+        return cartItemRepository.findByCartIdAndMinQuantity(cartId, minQuantity);
+    }
 }

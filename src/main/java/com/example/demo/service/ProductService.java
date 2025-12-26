@@ -10,7 +10,7 @@ public interface ProductService {
 
     Product updateProduct(Long id, Product product);
 
-    Optional<Product> getProductById(Long id);
+    Product getProductById(Long id);
 
     void deactivateProduct(Long id);
 }

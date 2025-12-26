@@ -6,7 +6,7 @@ import com.example.demo.model.CartItem;
 
 public interface CartItemService {
 
-    CartItem save(CartItem item);
+    List<CartItem> getItems(Long cartId);
 
     List<CartItem> getByCartIdAndMinQuantity(Long cartId, int minQuantity);
 }
