@@ -1,53 +1,85 @@
-package com.example.demo.model;
+package com.example.demo.service.impl;
 
-import jakarta.persistence.*;
+import com.example.demo.model.BundleRule;
+import com.example.demo.repository.BundleRuleRepository;
+import com.example.demo.service.BundleRuleService;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
 
-@Entity
-public class BundleRule {
+import java.util.List;
+import java.util.stream.Collectors;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Service
+@Transactional
+public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private String requiredProductIds;
+    private final BundleRuleRepository bundleRuleRepository;
 
-    private Integer discountPercentage;
-
-    private Boolean active = true;
-
-    public boolean isDiscountPercentageValid() {
-        return discountPercentage != null &&
-                discountPercentage >= 1 &&
-                discountPercentage <= 100;
+    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
+        this.bundleRuleRepository = bundleRuleRepository;
     }
 
-    // getters and setters
+    @Override
+    public BundleRule createRule(BundleRule rule) {
 
-    public Long getId() {
-        return id;
+        if (rule.getDiscountPercentage() == null ||
+                rule.getDiscountPercentage() < 1 ||
+                rule.getDiscountPercentage() > 100) {
+            throw new IllegalArgumentException("Invalid discount percentage");
+        }
+
+        if (rule.getRequiredProductIds() == null ||
+                rule.getRequiredProductIds().isBlank()) {
+            throw new IllegalArgumentException("Required products cannot be empty");
+        }
+
+        rule.setActive(true);
+        return bundleRuleRepository.save(rule);
     }
 
-    public String getRequiredProductIds() {
-        return requiredProductIds;
+    @Override
+    public BundleRule updateRule(Long id, BundleRule updatedRule) {
+
+        BundleRule existing = bundleRuleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
+
+        if (updatedRule.getDiscountPercentage() != null) {
+            if (updatedRule.getDiscountPercentage() < 1 ||
+                    updatedRule.getDiscountPercentage() > 100) {
+                throw new IllegalArgumentException("Invalid discount percentage");
+            }
+            existing.setDiscountPercentage(updatedRule.getDiscountPercentage());
+        }
+
+        if (updatedRule.getRequiredProductIds() != null &&
+                !updatedRule.getRequiredProductIds().isBlank()) {
+            existing.setRequiredProductIds(updatedRule.getRequiredProductIds());
+        }
+
+        return bundleRuleRepository.save(existing);
     }
 
-    public void setRequiredProductIds(String requiredProductIds) {
-        this.requiredProductIds = requiredProductIds;
+    @Override
+    public void deactivateRule(Long ruleId) {
+
+        BundleRule rule = bundleRuleRepository.findById(ruleId)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
+
+        rule.setActive(false);
+        bundleRuleRepository.save(rule);
     }
 
-    public Integer getDiscountPercentage() {
-        return discountPercentage;
+    @Override
+    public List<BundleRule> getActiveRules() {
+        return bundleRuleRepository.findAll()
+                .stream()
+                .filter(r -> Boolean.TRUE.equals(r.getActive()))
+                .collect(Collectors.toList());
     }
 
-    public void setDiscountPercentage(Integer discountPercentage) {
-        this.discountPercentage = discountPercentage;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
+    @Override
+    public BundleRule getRuleById(Long id) {
+        return bundleRuleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
     }
 }
