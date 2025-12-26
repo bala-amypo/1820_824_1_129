@@ -1,30 +1,24 @@
 package com.example.demo.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.Cart;
-import com.example.demo.repository.CartRepository;
-import com.example.demo.service.CartService;
+import com.example.demo.model.CartItem;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.service.CartItemService;
 
 @Service
-public class CartServiceImpl implements CartService {
+public class CartItemServiceImpl implements CartItemService {
 
-    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public CartServiceImpl(CartRepository cartRepository) {
-        this.cartRepository = cartRepository;
+    public CartItemServiceImpl(CartItemRepository cartItemRepository) {
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Override
-    public Cart createCart(Long userId) {
-        Cart cart = new Cart();
-        cart.setUserId(userId);
-        cart.setActive(true);
-        return cartRepository.save(cart);
-    }
-
-    @Override
-    public Cart getActiveCartForUser(Long userId) {
-        return cartRepository.findByUserIdAndActive(userId, true);
+    public List<CartItem> getItems(Long cartId) {
+        return cartItemRepository.findByCartId(cartId);
     }
 }
