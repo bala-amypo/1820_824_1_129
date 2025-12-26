@@ -6,9 +6,11 @@ import com.example.demo.model.Product;
 
 public interface ProductService {
 
-    Product save(Product product);
+    Product createProduct(Product product);
 
-    Optional<Product> getById(Long id);
+    Product updateProduct(Long id, Product product);
+
+    Optional<Product> getProductById(Long id);
 
     void deactivateProduct(Long id);
 }

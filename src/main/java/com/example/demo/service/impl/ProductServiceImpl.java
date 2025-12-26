@@ -18,18 +18,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product save(Product product) {
-
-        if (product.getPrice() <= 0) {
-            throw new IllegalArgumentException("Invalid price");
-        }
-
+    public Product createProduct(Product product) {
         product.setActive(true);
         return productRepository.save(product);
     }
 
     @Override
-    public Optional<Product> getById(Long id) {
+    public Product updateProduct(Long id, Product product) {
+        Product existing = productRepository.findById(id).orElseThrow();
+        existing.setActive(product.isActive());
+        return productRepository.save(existing);
+    }
+
+    @Override
+    public Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }
 

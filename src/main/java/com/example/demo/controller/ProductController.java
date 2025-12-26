@@ -1,17 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Product;
-import com.example.demo.service.ProductService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.model.Product;
+import com.example.demo.service.ProductService;
 
 @RestController
 @RequestMapping("/products")
@@ -24,28 +22,17 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody Product product) {
-        Product saved = productService.createProduct(product);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    public Product create(@RequestBody Product product) {
+        return productService.createProduct(product);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(
-            @PathVariable Long id,
-            @RequestBody Product product) {
-
-        Product updated = productService.updateProduct(id, product);
-        return ResponseEntity.ok(updated);
+    public Product update(@PathVariable Long id, @RequestBody Product product) {
+        return productService.updateProduct(id, product);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> get(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        productService.deactivateProduct(id);
-        return ResponseEntity.noContent().build();
+    public Product get(@PathVariable Long id) {
+        return productService.getProductById(id).orElseThrow();
     }
 }

@@ -16,10 +16,12 @@ public class CartItem {
 
     private Long cartId;
 
+    private Long productId;
+
     private int quantity;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     private Product product;
 
     public Long getId() {
@@ -28,6 +30,10 @@ public class CartItem {
 
     public Long getCartId() {
         return cartId;
+    }
+
+    public Long getProductId() {
+        return productId;
     }
 
     public int getQuantity() {
