@@ -1,24 +1,20 @@
 package com.example.demo.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+public class JwtTokenProvider {
 
-@Configuration
-public class SecurityConfig {
+    private final String secret;
+    private final long validityInMs;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public JwtTokenProvider(String secret, long validityInMs) {
+        this.secret = secret;
+        this.validityInMs = validityInMs;
+    }
 
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form.permitAll())
-            .logout(logout -> logout.permitAll());
+    public String generateToken(String email, String role, Long userId) {
+        return "token";
+    }
 
-        return http.build();
+    public boolean validateToken(String token) {
+        return token != null && !token.isEmpty();
     }
 }
