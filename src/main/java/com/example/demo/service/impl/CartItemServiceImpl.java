@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
+import com.example.demo.model.Product;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.service.CartItemService;
@@ -25,18 +26,28 @@ public class CartItemServiceImpl implements CartItemService {
         this.cartRepository = cartRepository;
     }
 
+    // ✅ THIS MUST MATCH THE INTERFACE EXACTLY
     @Override
-    public CartItem addItemToCart(CartItem item) {
-        if (item.getCart() == null || item.getCart().getId() == null) {
-            throw new IllegalArgumentException("Cart ID must be provided");
+    public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
         }
 
-        Cart cart = cartRepository.findById(item.getCart().getId())
+        Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
         if (Boolean.FALSE.equals(cart.getActive())) {
             throw new IllegalStateException("Cart is inactive");
         }
+
+        CartItem item = new CartItem();
+        item.setCart(cart);
+        item.setQuantity(quantity);
+
+        Product product = new Product();
+        product.setId(productId);
+        item.setProduct(product);
 
         return cartItemRepository.save(item);
     }
