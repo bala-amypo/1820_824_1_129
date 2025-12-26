@@ -7,8 +7,12 @@ import com.example.demo.model.Product;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.ProductRepository;
+import com.example.demo.service.CartItemService;
+import org.springframework.stereotype.Service;
+import java.util.List;
 
-public class CartItemServiceImpl {
+@Service
+public class CartItemServiceImpl implements CartItemService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
@@ -24,8 +28,10 @@ public class CartItemServiceImpl {
         this.cartItemRepository = cartItemRepository;
     }
 
+    @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
-        if (quantity <= 0) {
+
+        if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
 
@@ -43,5 +49,33 @@ public class CartItemServiceImpl {
         item.setQuantity(quantity);
 
         return cartItemRepository.save(item);
+    }
+
+    @Override
+    public CartItem updateItem(Long id, Integer quantity) {
+
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+
+        CartItem item = cartItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("CartItem not found"));
+
+        item.setQuantity(quantity);
+        return cartItemRepository.save(item);
+    }
+
+    @Override
+    public List<CartItem> getItemsForCart(Long cartId) {
+        return cartItemRepository.findByCartId(cartId);
+    }
+
+    @Override
+    public void removeItem(Long id) {
+        CartItem item = cartItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("CartItem not found"));
+        cartItemRepository.delete(item);
     }
 }
