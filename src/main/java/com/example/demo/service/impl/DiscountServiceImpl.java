@@ -11,16 +11,19 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountServiceImpl implements DiscountService {
 
-    private final CartItemRepository cartItemRepo;
+    private final CartItemRepository itemRepo;
     private final BundleRuleRepository ruleRepo;
     private final DiscountApplicationRepository discountRepo;
+    private final CartRepository cartRepo;
 
-    public DiscountServiceImpl(CartItemRepository cartItemRepo,
+    public DiscountServiceImpl(CartItemRepository itemRepo,
                                BundleRuleRepository ruleRepo,
-                               DiscountApplicationRepository discountRepo) {
-        this.cartItemRepo = cartItemRepo;
+                               DiscountApplicationRepository discountRepo,
+                               CartRepository cartRepo) {
+        this.itemRepo = itemRepo;
         this.ruleRepo = ruleRepo;
         this.discountRepo = discountRepo;
+        this.cartRepo = cartRepo;
     }
 
     @Override
@@ -30,12 +33,13 @@ public class DiscountServiceImpl implements DiscountService {
             return List.of();
         }
 
-        List<CartItem> items = cartItemRepo.findByCart(cart);
-        Set<Long> productIds = items.stream()
+        Set<Long> productIds = itemRepo.findAll()
+                .stream()
+                .filter(i -> i.getCart().getId().equals(cart.getId()))
                 .map(i -> i.getProduct().getId())
                 .collect(Collectors.toSet());
 
-        List<DiscountApplication> applied = new ArrayList<>();
+        List<DiscountApplication> result = new ArrayList<>();
 
         for (BundleRule rule : ruleRepo.findAll()) {
 
@@ -50,12 +54,20 @@ public class DiscountServiceImpl implements DiscountService {
             if (productIds.containsAll(required)) {
                 DiscountApplication da = new DiscountApplication();
                 da.setCart(cart);
-                da.setRule(rule);
+                da.setBundleRule(rule);
                 discountRepo.save(da);
-                applied.add(da);
+                result.add(da);
             }
         }
 
-        return applied;
+        return result;
+    }
+
+    @Override
+    public List<DiscountApplication> getApplicationsForCart(Long cartId) {
+        return discountRepo.findAll()
+                .stream()
+                .filter(d -> d.getCart().getId().equals(cartId))
+                .toList();
     }
 }

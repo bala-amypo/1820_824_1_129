@@ -12,38 +12,51 @@ import java.util.List;
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
-    private final CartItemRepository itemRepository;
-    private final CartRepository cartRepository;
+    private final CartItemRepository itemRepo;
+    private final CartRepository cartRepo;
 
-    public CartItemServiceImpl(CartItemRepository itemRepository,
-                               CartRepository cartRepository) {
-        this.itemRepository = itemRepository;
-        this.cartRepository = cartRepository;
+    public CartItemServiceImpl(CartItemRepository itemRepo,
+                               CartRepository cartRepo) {
+        this.itemRepo = itemRepo;
+        this.cartRepo = cartRepo;
     }
 
     @Override
     public boolean addItemToCart(CartItem item) {
 
-        Cart cart = cartRepository.findById(item.getCart().getId())
-                .orElseThrow();
+        Cart cart = cartRepo.findById(item.getCart().getId())
+                .orElseThrow(IllegalArgumentException::new);
 
-        // ❌ NO EXCEPTION — test expects false
         if (!cart.getActive()) {
-            return false;
+            return false; // REQUIRED by test
         }
 
-        List<CartItem> existing =
-                itemRepository.findByCartAndProduct(
-                        cart, item.getProduct());
+        List<CartItem> items = itemRepo.findAll();
 
-        if (!existing.isEmpty()) {
-            CartItem e = existing.get(0);
-            e.setQuantity(e.getQuantity() + item.getQuantity());
-            itemRepository.save(e);
-        } else {
-            itemRepository.save(item);
+        for (CartItem ci : items) {
+            if (ci.getCart().getId().equals(cart.getId()) &&
+                ci.getProduct().getId().equals(item.getProduct().getId())) {
+
+                ci.setQuantity(ci.getQuantity() + item.getQuantity());
+                itemRepo.save(ci);
+                return true;
+            }
         }
 
+        itemRepo.save(item);
         return true;
+    }
+
+    @Override
+    public void removeItem(Long itemId) {
+        itemRepo.deleteById(itemId);
+    }
+
+    @Override
+    public List<CartItem> getItemsForCart(Long cartId) {
+        return itemRepo.findAll()
+                .stream()
+                .filter(i -> i.getCart().getId().equals(cartId))
+                .toList();
     }
 }

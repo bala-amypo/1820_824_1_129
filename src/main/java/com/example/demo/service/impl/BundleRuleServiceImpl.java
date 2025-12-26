@@ -11,16 +11,16 @@ import java.util.stream.Collectors;
 @Service
 public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private final BundleRuleRepository repository;
+    private final BundleRuleRepository repo;
 
-    public BundleRuleServiceImpl(BundleRuleRepository repository) {
-        this.repository = repository;
+    public BundleRuleServiceImpl(BundleRuleRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public BundleRule createRule(BundleRule rule) {
 
-        if (!isValidDiscountRange(rule)) {
+        if (rule.getDiscountPercentage() < 1 || rule.getDiscountPercentage() > 100) {
             throw new IllegalArgumentException("Invalid discount");
         }
 
@@ -29,18 +29,20 @@ public class BundleRuleServiceImpl implements BundleRuleService {
         }
 
         rule.setActive(true);
-        return repository.save(rule);
+        return repo.save(rule);
     }
 
-    // ✅ REQUIRED BY TEST
-    public boolean isValidDiscountRange(BundleRule rule) {
-        return rule.getDiscountPercentage() >= 1
-                && rule.getDiscountPercentage() <= 100;
+    @Override
+    public void deactivateRule(Long id) {
+        BundleRule rule = repo.findById(id)
+                .orElseThrow(IllegalArgumentException::new);
+        rule.setActive(false);
+        repo.save(rule);
     }
 
     @Override
     public List<BundleRule> getActiveRules() {
-        return repository.findAll()
+        return repo.findAll()
                 .stream()
                 .filter(BundleRule::getActive)
                 .collect(Collectors.toList());
