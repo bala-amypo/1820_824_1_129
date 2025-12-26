@@ -3,23 +3,20 @@ package com.example.demo.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class BundleRule {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String ruleName;
 
-    @Column(nullable = false)
     private String requiredProductIds;
-
     private Double discountPercentage;
-
     private Boolean active = true;
 
     public Long getId() { return id; }
