@@ -13,54 +13,58 @@ import java.util.List;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
+private final CartItemRepository cartItemRepository;
+private final CartRepository cartRepository;
+private final ProductRepository productRepository;
 
-    private final CartItemRepository cartItemRepository;
-    private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
+public CartItemServiceImpl(
+        CartItemRepository cartItemRepository,
+        CartRepository cartRepository,
+        ProductRepository productRepository
+) {
+    this.cartItemRepository = cartItemRepository;
+    this.cartRepository = cartRepository;
+    this.productRepository = productRepository;
+}
 
-    public CartItemServiceImpl(
-            CartItemRepository cartItemRepository,
-            CartRepository cartRepository,
-            ProductRepository productRepository
-    ) {
-        this.cartItemRepository = cartItemRepository;
-        this.cartRepository = cartRepository;
-        this.productRepository = productRepository;
+@Override
+public CartItem addItem(Long cartId, Long productId, int quantity) {
+
+    if (quantity <= 0) {
+        throw new IllegalArgumentException("Quantity must be positive");
     }
 
-    @Override
-    public CartItem addItem(Long cartId, Long productId, int quantity) {
-
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-        if (cart == null || !cart.isActive()) {
-            throw new IllegalArgumentException("Cart is inactive");
-        }
-
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
-        }
-
-        Product product = productRepository.findById(productId).orElse(null);
-
-        List<CartItem> existingItems =
-                cartItemRepository.findByCartIdAndProductId(cartId, productId);
-
-        if (!existingItems.isEmpty()) {
-            CartItem existing = existingItems.get(0);
-            existing.setQuantity(existing.getQuantity() + quantity);
-            return cartItemRepository.save(existing);
-        }
-
-        CartItem item = new CartItem();
-        item.setCart(cart);
-        item.setProduct(product);
-        item.setQuantity(quantity);
-
-        return cartItemRepository.save(item);
+    Cart cart = cartRepository.findById(cartId).orElse(null);
+    if (cart == null || !cart.getActive()) {
+        throw new IllegalArgumentException("Cart inactive");
     }
 
-    @Override
-    public List<CartItem> getItemsForCart(Long cartId) {
-        return cartItemRepository.findByCartId(cartId);
+    Product product = productRepository.findById(productId).orElse(null);
+
+    CartItem existing = cartItemRepository
+            .findByCartIdAndProductId(cartId, productId)
+            .orElse(null);
+
+    if (existing != null) {
+        existing.setQuantity(existing.getQuantity() + quantity);
+        return cartItemRepository.save(existing);
     }
+
+    CartItem item = new CartItem();
+    item.setCart(cart);
+    item.setProduct(product);
+    item.setQuantity(quantity);
+
+    return cartItemRepository.save(item);
+}
+
+@Override
+public void removeItem(Long id) {
+    cartItemRepository.deleteById(id);
+}
+
+@Override
+public List<CartItem> getItemsForCart(Long cartId) {
+    return cartItemRepository.findByCartId(cartId);
+}
 }
