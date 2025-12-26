@@ -2,11 +2,12 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.Cart;
 import com.example.demo.repository.CartRepository;
+import com.example.demo.service.CartService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CartServiceImpl {
+public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
 
@@ -14,6 +15,7 @@ public class CartServiceImpl {
         this.cartRepository = cartRepository;
     }
 
+    @Override
     public Cart createCart(Long userId) {
         return cartRepository.findByUserIdAndActiveTrue(userId)
                 .orElseGet(() -> {
@@ -24,6 +26,7 @@ public class CartServiceImpl {
                 });
     }
 
+    @Override
     public Cart getActiveCartForUser(Long userId) {
         return cartRepository.findByUserIdAndActiveTrue(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Active cart not found"));
