@@ -1,36 +1,37 @@
 package com.example.demo.service.impl;
 
-import java.util.ArrayList;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.Cart;
+import com.example.demo.model.DiscountApplication;
+import com.example.demo.repository.BundleRuleRepository;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.repository.CartRepository;
+import com.example.demo.repository.DiscountApplicationRepository;
 import java.util.List;
 
-import org.springframework.stereotype.Service;
+public class DiscountServiceImpl {
 
-import com.example.demo.model.CartItem;
-import com.example.demo.model.DiscountApplication;
-import com.example.demo.repository.CartItemRepository;
-import com.example.demo.service.DiscountService;
-
-@Service
-public class DiscountServiceImpl implements DiscountService {
-
+    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final BundleRuleRepository bundleRuleRepository;
+    private final DiscountApplicationRepository discountApplicationRepository;
 
-    public DiscountServiceImpl(CartItemRepository cartItemRepository) {
+    public DiscountServiceImpl(
+            CartRepository cartRepository,
+            CartItemRepository cartItemRepository,
+            BundleRuleRepository bundleRuleRepository,
+            DiscountApplicationRepository discountApplicationRepository) {
+
+        this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.bundleRuleRepository = bundleRuleRepository;
+        this.discountApplicationRepository = discountApplicationRepository;
     }
 
-    @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
-
-        List<CartItem> items = cartItemRepository.findByCartId(cartId);
-        List<DiscountApplication> discounts = new ArrayList<>();
-
-        for (CartItem ci : items) {
-            if (ci.getQuantity() >= 2 && ci.getProduct() != null) {
-                double amount = ci.getProduct().getPrice() * 0.10;
-                discounts.add(new DiscountApplication("Bulk discount", amount));
-            }
-        }
-        return discounts;
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cart not found"));
+        return discountApplicationRepository.findByCartId(cart.getId());
     }
 }

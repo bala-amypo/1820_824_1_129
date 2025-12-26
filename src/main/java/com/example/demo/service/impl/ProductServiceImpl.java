@@ -1,15 +1,11 @@
 package com.example.demo.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
-
-import org.springframework.stereotype.Service;
-
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
-import com.example.demo.service.ProductService;
+import java.math.BigDecimal;
 
-@Service
-public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl {
 
     private final ProductRepository productRepository;
 
@@ -17,31 +13,25 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository = productRepository;
     }
 
-    @Override
     public Product createProduct(Product product) {
-        if (product.getPrice() <= 0) {
+        if (product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
-        product.setActive(true);
+
+        productRepository.findBySku(product.getSku())
+                .ifPresent(p -> {
+                    throw new IllegalArgumentException("SKU already exists");
+                });
+
         return productRepository.save(product);
     }
 
-    @Override
-    public Product updateProduct(Long id, Product product) {
-        Product existing = productRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-        existing.setName(product.getName());
-        existing.setPrice(product.getPrice());
-        return productRepository.save(existing);
-    }
-
-    @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
     }
 
-    @Override
     public void deactivateProduct(Long id) {
         Product product = getProductById(id);
         product.setActive(false);

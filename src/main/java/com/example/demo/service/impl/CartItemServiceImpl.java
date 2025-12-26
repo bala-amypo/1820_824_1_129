@@ -1,34 +1,47 @@
 package com.example.demo.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
+import com.example.demo.model.Product;
 import com.example.demo.repository.CartItemRepository;
-import com.example.demo.service.CartItemService;
+import com.example.demo.repository.CartRepository;
+import com.example.demo.repository.ProductRepository;
 
-@Service
-public class CartItemServiceImpl implements CartItemService {
+public class CartItemServiceImpl {
 
-    private final CartItemRepository repository;
+    private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public CartItemServiceImpl(CartItemRepository repository) {
-        this.repository = repository;
+    public CartItemServiceImpl(
+            CartRepository cartRepository,
+            ProductRepository productRepository,
+            CartItemRepository cartItemRepository) {
+
+        this.cartRepository = cartRepository;
+        this.productRepository = productRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
-    @Override
-    public CartItem save(CartItem item) {
-        return repository.save(item);
-    }
+    public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
 
-    @Override
-    public List<CartItem> getItems(Long cartId) {
-        return repository.findByCartId(cartId);
-    }
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cart not found"));
 
-    @Override
-    public List<CartItem> getByCartIdAndMinQuantity(Long cartId, int minQuantity) {
-        return repository.findByCartIdAndMinQuantity(cartId, minQuantity);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
+
+        CartItem item = new CartItem();
+        item.setCart(cart);
+        item.setProduct(product);
+        item.setQuantity(quantity);
+
+        return cartItemRepository.save(item);
     }
 }

@@ -1,13 +1,10 @@
 package com.example.demo.service.impl;
 
-import org.springframework.stereotype.Service;
-
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Cart;
 import com.example.demo.repository.CartRepository;
-import com.example.demo.service.CartService;
 
-@Service
-public class CartServiceImpl implements CartService {
+public class CartServiceImpl {
 
     private final CartRepository cartRepository;
 
@@ -15,16 +12,20 @@ public class CartServiceImpl implements CartService {
         this.cartRepository = cartRepository;
     }
 
-    @Override
     public Cart createCart(Long userId) {
+        cartRepository.findByUserId(userId)
+                .ifPresent(c -> {
+                    throw new IllegalArgumentException("Cart already exists");
+                });
+
         Cart cart = new Cart();
         cart.setUserId(userId);
-        cart.setActive(true);
         return cartRepository.save(cart);
     }
 
-    @Override
-    public Cart getActiveCartForUser(Long userId) {
-        return cartRepository.findByUserIdAndActive(userId, true);
+    public Cart getCartById(Long id) {
+        return cartRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Cart not found"));
     }
 }
