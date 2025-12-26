@@ -1,29 +1,42 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Cart {
+public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    private Long cartId;
 
-    @Column(nullable = false)
-    private Boolean active = true;
+    private Long productId;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    private int quantity;
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    @ManyToOne
+    @JoinColumn(name = "productId", insertable = false, updatable = false)
+    private Product product;
 
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
+    public Long getId() {
+        return id;
+    }
+
+    public Long getCartId() {
+        return cartId;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
 }

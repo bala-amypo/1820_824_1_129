@@ -9,13 +9,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .formLogin(login -> login.permitAll())
+            .formLogin(form -> form.permitAll())
             .logout(logout -> logout.permitAll());
 
         return http.build();
