@@ -1,15 +1,12 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.model.Cart;
-import com.example.demo.model.DiscountApplication;
-import com.example.demo.repository.BundleRuleRepository;
-import com.example.demo.repository.CartItemRepository;
-import com.example.demo.repository.CartRepository;
-import com.example.demo.repository.DiscountApplicationRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
@@ -23,8 +20,8 @@ public class DiscountServiceImpl implements DiscountService {
             CartRepository cartRepository,
             CartItemRepository cartItemRepository,
             BundleRuleRepository bundleRuleRepository,
-            DiscountApplicationRepository discountApplicationRepository) {
-
+            DiscountApplicationRepository discountApplicationRepository
+    ) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.bundleRuleRepository = bundleRuleRepository;
@@ -34,22 +31,41 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
 
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Cart not found"));
+        Cart cart = cartRepository.findById(cartId).orElse(null);
+        if (cart == null || !cart.isActive()) {
+            return List.of();
+        }
 
-        return discountApplicationRepository.findByCartId(cart.getId());
-    }
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cartId);
+        if (cartItems.isEmpty()) {
+            return List.of();
+        }
 
-    @Override
-    public DiscountApplication getApplicationById(Long id) {
-        return discountApplicationRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("DiscountApplication not found"));
-    }
+        Set<Long> cartProductIds = cartItems.stream()
+                .map(ci -> ci.getProduct().getId())
+                .collect(Collectors.toSet());
 
-    @Override
-    public List<DiscountApplication> getApplicationsForCart(Long cartId) {
-        return discountApplicationRepository.findByCartId(cartId);
+        List<DiscountApplication> applied = new ArrayList<>();
+
+        for (BundleRule rule : bundleRuleRepository.findAll()) {
+
+            if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
+                continue;
+            }
+
+            Set<Long> requiredIds = Arrays.stream(rule.getRequiredProductIds().split(","))
+                    .map(String::trim)
+                    .map(Long::valueOf)
+                    .collect(Collectors.toSet());
+
+            if (cartProductIds.containsAll(requiredIds)) {
+                DiscountApplication da = new DiscountApplication();
+                da.setCart(cart);
+                da.setRule(rule);
+                applied.add(da);
+            }
+        }
+
+        return applied;
     }
 }
