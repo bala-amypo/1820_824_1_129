@@ -49,7 +49,6 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
-
         if (items.isEmpty()) {
             return List.of();
         }
@@ -67,17 +66,27 @@ public class DiscountServiceImpl implements DiscountService {
                 continue;
             }
 
-            Set<Long> required = rule.getRequiredProductIdSet();
-            if (required == null || required.isEmpty()) {
+            if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
                 continue;
             }
 
-            if (productIds.containsAll(required)) {
-                DiscountApplication app = new DiscountApplication();
-                app.setCart(cart);
-                app.setBundleRule(rule);
+            Set<Long> requiredProductIds = List.of(rule.getRequiredProductIds().split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Long::valueOf)
+                    .collect(Collectors.toSet());
 
-                results.add(discountApplicationRepository.save(app));
+            if (requiredProductIds.isEmpty()) {
+                continue;
+            }
+
+            if (productIds.containsAll(requiredProductIds)) {
+                DiscountApplication application = new DiscountApplication();
+                application.setCart(cart);
+                application.setBundleRule(rule);
+
+                results.add(discountApplicationRepository.save(application));
             }
         }
 

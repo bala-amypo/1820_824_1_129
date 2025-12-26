@@ -3,7 +3,9 @@ package com.example.demo.service.impl;
 import com.example.demo.model.BundleRule;
 import com.example.demo.repository.BundleRuleRepository;
 import com.example.demo.service.BundleRuleService;
+
 import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +35,6 @@ public class BundleRuleServiceImpl implements BundleRuleService {
             throw new IllegalArgumentException("Required product IDs cannot be empty");
         }
 
-        // Defensive cleanup (important)
         String cleaned = rule.getRequiredProductIds().trim();
         if (cleaned.replace(",", "").isBlank()) {
             throw new IllegalArgumentException("Invalid product ID list");
@@ -51,7 +52,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
 
         if (Boolean.FALSE.equals(rule.getActive())) {
-            return; // already inactive, no-op
+            return;
         }
 
         rule.setActive(false);
@@ -64,5 +65,11 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .stream()
                 .filter(r -> Boolean.TRUE.equals(r.getActive()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BundleRule getRuleById(Long id) {
+        return bundleRuleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
     }
 }
