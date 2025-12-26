@@ -6,12 +6,13 @@ import com.example.demo.model.Product;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.ProductRepository;
+import com.example.demo.service.CartItemService;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CartItemServiceImpl {
+public class CartItemServiceImpl implements CartItemService {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
@@ -27,6 +28,7 @@ public class CartItemServiceImpl {
         this.cartItemRepository = cartItemRepository;
     }
 
+    @Override
     public CartItem addItemToCart(CartItem item) {
 
         Cart cart = cartRepository.findById(item.getCart().getId())
@@ -58,6 +60,7 @@ public class CartItemServiceImpl {
         return cartItemRepository.save(item);
     }
 
+    @Override
     public List<CartItem> getItemsForCart(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
