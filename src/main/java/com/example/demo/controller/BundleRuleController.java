@@ -2,15 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.model.BundleRule;
 import com.example.demo.service.BundleRuleService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
-@RequestMapping("/bundle-rules")
+@RequestMapping("/api/bundle-rules")
+@Tag(name = "Bundle Rules")
 public class BundleRuleController {
 
     private final BundleRuleService bundleRuleService;
@@ -20,8 +18,28 @@ public class BundleRuleController {
     }
 
     @PostMapping
-    public ResponseEntity<BundleRule> create(@RequestBody BundleRule rule) {
-        BundleRule saved = bundleRuleService.createRule(rule);
-        return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    public BundleRule create(@RequestBody BundleRule rule) {
+        return bundleRuleService.createRule(rule);
+    }
+
+    @PutMapping("/{id}")
+    public BundleRule update(@PathVariable Long id,
+                             @RequestBody BundleRule rule) {
+        return bundleRuleService.updateRule(id, rule);
+    }
+
+    @GetMapping("/{id}")
+    public BundleRule get(@PathVariable Long id) {
+        return bundleRuleService.getRuleById(id);
+    }
+
+    @GetMapping("/active")
+    public List<BundleRule> active() {
+        return bundleRuleService.getActiveRules();
+    }
+
+    @PutMapping("/{id}/deactivate")
+    public void deactivate(@PathVariable Long id) {
+        bundleRuleService.deactivateRule(id);
     }
 }

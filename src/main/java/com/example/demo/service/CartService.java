@@ -6,5 +6,9 @@ public interface CartService {
 
     Cart createCart(Long userId);
 
-    Cart getActiveCartForUser(Long userId);
+    Cart getCartById(Long id);
+
+    Cart getCartByUserId(Long userId);
+
+    void deactivateCart(Long id);
 }

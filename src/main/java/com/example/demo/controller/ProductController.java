@@ -1,12 +1,14 @@
 package com.example.demo.controller;
 
-import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.model.Product;
 import com.example.demo.service.ProductService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/products")
+@Tag(name = "Products")
 public class ProductController {
 
     private final ProductService productService;
@@ -21,7 +23,8 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody Product product) {
+    public Product update(@PathVariable Long id,
+                          @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 
@@ -30,7 +33,12 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping
+    public List<Product> list() {
+        return productService.getAllProducts();
+    }
+
+    @PutMapping("/{id}/deactivate")
     public void deactivate(@PathVariable Long id) {
         productService.deactivateProduct(id);
     }
