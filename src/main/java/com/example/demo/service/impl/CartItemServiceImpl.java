@@ -26,7 +26,26 @@ public class CartItemServiceImpl implements CartItemService {
         this.cartRepository = cartRepository;
     }
 
-    // ✅ THIS MUST MATCH THE INTERFACE EXACTLY
+    /**
+     * ✅ REQUIRED BY TESTS
+     * Convenience method that delegates to addItem(...)
+     */
+    public CartItem addItemToCart(CartItem item) {
+
+        if (item == null || item.getCart() == null || item.getProduct() == null) {
+            throw new IllegalArgumentException("Cart, product and quantity must be provided");
+        }
+
+        return addItem(
+                item.getCart().getId(),
+                item.getProduct().getId(),
+                item.getQuantity()
+        );
+    }
+
+    /**
+     * ✅ REQUIRED BY INTERFACE
+     */
     @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
 
