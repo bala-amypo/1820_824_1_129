@@ -2,10 +2,11 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.BundleRule;
 import com.example.demo.repository.BundleRuleRepository;
+import com.example.demo.service.BundleRuleService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BundleRuleServiceImpl {
+public class BundleRuleServiceImpl implements BundleRuleService {
 
     private final BundleRuleRepository bundleRuleRepository;
 
@@ -13,6 +14,7 @@ public class BundleRuleServiceImpl {
         this.bundleRuleRepository = bundleRuleRepository;
     }
 
+    @Override
     public BundleRule createRule(BundleRule rule) {
         if (rule.getDiscountPercentage() < 0 || rule.getDiscountPercentage() > 100) {
             throw new IllegalArgumentException("Discount must be between 0 and 100");
