@@ -22,4 +22,9 @@ public class CartServiceImpl implements CartService {
         cart.setActive(true);
         return cartRepository.save(cart);
     }
+
+    @Override
+    public Cart getActiveCartForUser(Long userId) {
+        return cartRepository.findByUserIdAndActive(userId, true);
+    }
 }
