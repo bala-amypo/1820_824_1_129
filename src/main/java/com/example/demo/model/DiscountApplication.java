@@ -38,6 +38,14 @@ public class DiscountApplication {
     public void setBundleRule(BundleRule bundleRule) {
         this.bundleRule = bundleRule;
     }
+    public void setId(Long id) {
+    this.id = id;
+}
+
+public void setAppliedAt(java.time.LocalDateTime appliedAt) {
+    this.appliedAt = appliedAt;
+}
+
 
     public BigDecimal getDiscountAmount() { return discountAmount; }
     public void setDiscountAmount(BigDecimal discountAmount) {

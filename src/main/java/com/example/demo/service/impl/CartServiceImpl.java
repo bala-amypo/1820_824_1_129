@@ -14,6 +14,13 @@ public class CartServiceImpl implements CartService {
     public CartServiceImpl(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
+    public Cart getActiveCartForUser(Long userId) {
+    return cartRepository.findByUserIdAndActiveTrue(userId)
+            .orElseThrow(() ->
+                    new jakarta.persistence.EntityNotFoundException(
+                            "Active cart not found"));
+}
+
 
     @Override
     public Cart createCart(Long userId) {

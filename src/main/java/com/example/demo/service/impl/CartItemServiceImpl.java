@@ -70,6 +70,27 @@ public class CartItemServiceImpl implements CartItemService {
     public List<CartItem> getItemsForCart(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
+    public CartItem addItemToCart(CartItem item) {
+
+    if (item.getQuantity() == null || item.getQuantity() <= 0) {
+        throw new IllegalArgumentException("Quantity must be positive");
+    }
+
+    Long cartId = item.getCart().getId();
+    Long productId = item.getProduct().getId();
+
+    CartItem existing = cartItemRepository
+            .findByCartIdAndProductId(cartId, productId)
+            .orElse(null);
+
+    if (existing != null) {
+        existing.setQuantity(existing.getQuantity() + item.getQuantity());
+        return cartItemRepository.save(existing);
+    }
+
+    return cartItemRepository.save(item);
+}
+
 
     @Override
     public void removeItem(Long id) {
