@@ -9,20 +9,38 @@ public class BundleRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String ruleName;
+
     private String requiredProductIds;
 
-    private Integer discountPercentage;
+    private double discountPercentage;
 
     private Boolean active = true;
 
+    // ======== TEST-REQUIRED METHODS ========
+
     public boolean isDiscountPercentageValid() {
-        return discountPercentage != null &&
-                discountPercentage >= 1 &&
-                discountPercentage <= 100;
+        return discountPercentage >= 1 && discountPercentage <= 100;
     }
+
+    // ======== GETTERS & SETTERS ========
 
     public Long getId() {
         return id;
+    }
+
+    // Tests explicitly call setId(...)
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    // Tests explicitly call setRuleName(...)
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
     }
 
     public String getRequiredProductIds() {
@@ -33,11 +51,12 @@ public class BundleRule {
         this.requiredProductIds = requiredProductIds;
     }
 
-    public Integer getDiscountPercentage() {
+    public double getDiscountPercentage() {
         return discountPercentage;
     }
 
-    public void setDiscountPercentage(Integer discountPercentage) {
+    // Tests pass double literals
+    public void setDiscountPercentage(double discountPercentage) {
         this.discountPercentage = discountPercentage;
     }
 
