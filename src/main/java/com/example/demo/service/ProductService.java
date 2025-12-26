@@ -1,10 +1,14 @@
 package com.example.demo.service;
 
+import java.util.Optional;
+
 import com.example.demo.model.Product;
 
 public interface ProductService {
-    Product createProduct(Product product);
-    Product updateProduct(Long id, Product product);
-    Product getProductById(Long id);
+
+    Product save(Product product);
+
+    Optional<Product> getById(Long id);
+
     void deactivateProduct(Long id);
 }

@@ -1,10 +1,12 @@
 package com.example.demo.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.CartItem;
+import com.example.demo.model.DiscountApplication;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.service.DiscountService;
 
@@ -18,16 +20,17 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public double evaluateDiscounts(Long cartId) {
+    public List<DiscountApplication> evaluateDiscounts(Long cartId) {
 
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
-        double discount = 0.0;
+        List<DiscountApplication> discounts = new ArrayList<>();
 
         for (CartItem ci : items) {
             if (ci.getQuantity() >= 2 && ci.getProduct() != null) {
-                discount += ci.getProduct().getPrice() * 0.10;
+                double amount = ci.getProduct().getPrice() * 0.10;
+                discounts.add(new DiscountApplication("Bulk discount", amount));
             }
         }
-        return discount;
+        return discounts;
     }
 }

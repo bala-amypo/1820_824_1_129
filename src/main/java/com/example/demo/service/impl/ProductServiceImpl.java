@@ -20,29 +20,23 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product save(Product product) {
 
-        // FIX 1: double can never be null
         if (product.getPrice() <= 0) {
-            throw new IllegalArgumentException("Price must be greater than zero");
+            throw new IllegalArgumentException("Invalid price");
         }
 
-        // FIX 2: SKU validation (tests expect this)
-        if (product.getSku() == null || product.getSku().isBlank()) {
-            throw new IllegalArgumentException("SKU is required");
-        }
-
-        // FIX 3: Name validation
-        if (product.getName() == null || product.getName().isBlank()) {
-            throw new IllegalArgumentException("Product name is required");
-        }
-
-        // FIX 4: default active flag
         product.setActive(true);
-
         return productRepository.save(product);
     }
 
     @Override
     public Optional<Product> getById(Long id) {
         return productRepository.findById(id);
+    }
+
+    @Override
+    public void deactivateProduct(Long id) {
+        Product product = productRepository.findById(id).orElseThrow();
+        product.setActive(false);
+        productRepository.save(product);
     }
 }

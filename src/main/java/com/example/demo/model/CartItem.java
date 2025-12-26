@@ -1,28 +1,27 @@
 package com.example.demo.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
-@Table(name = "cart_items")
 public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Long cartId;
 
-    @Column(nullable = false)
-    private Long productId;
-
-    @Column(nullable = false)
     private int quantity;
 
-    @Column(nullable = false)
-    private int minQuantity;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    // getters & setters
     public Long getId() {
         return id;
     }
@@ -31,31 +30,11 @@ public class CartItem {
         return cartId;
     }
 
-    public void setCartId(Long cartId) {
-        this.cartId = cartId;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public int getMinQuantity() {
-        return minQuantity;
-    }
-
-    public void setMinQuantity(int minQuantity) {
-        this.minQuantity = minQuantity;
+    public Product getProduct() {
+        return product;
     }
 }

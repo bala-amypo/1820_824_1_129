@@ -1,48 +1,21 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-@Entity
 public class DiscountApplication {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String description;
 
-    @ManyToOne
-    private Cart cart;
+    private double amount;
 
-    @ManyToOne
-    private BundleRule bundleRule;
-
-    private BigDecimal discountAmount;
-
-    private LocalDateTime appliedAt;
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Cart getCart() { return cart; }
-    public void setCart(Cart cart) { this.cart = cart; }
-
-    public BundleRule getBundleRule() { return bundleRule; }
-    public void setBundleRule(BundleRule bundleRule) {
-        this.bundleRule = bundleRule;
+    public DiscountApplication(String description, double amount) {
+        this.description = description;
+        this.amount = amount;
     }
 
-    public BigDecimal getDiscountAmount() { return discountAmount; }
-    public void setDiscountAmount(BigDecimal discountAmount) {
-        this.discountAmount = discountAmount;
+    public String getDescription() {
+        return description;
     }
 
-    public LocalDateTime getAppliedAt() { return appliedAt; }
-    public void setAppliedAt(LocalDateTime appliedAt) {
-        this.appliedAt = appliedAt;
+    public double getAmount() {
+        return amount;
     }
 }
