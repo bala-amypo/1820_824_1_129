@@ -28,10 +28,6 @@ public class CartItemServiceImpl implements CartItemService {
 
     // Used by tests
     public CartItem addItemToCart(CartItem item) {
-        if (item == null || item.getCart() == null || item.getProduct() == null) {
-            throw new IllegalArgumentException("Invalid cart item");
-        }
-
         return addItem(
                 item.getCart().getId(),
                 item.getProduct().getId(),
@@ -46,14 +42,11 @@ public class CartItemServiceImpl implements CartItemService {
             throw new IllegalArgumentException("Quantity must be positive");
         }
 
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-
-        if (cart == null) {
-            return null;
-        }
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
         if (Boolean.FALSE.equals(cart.getActive())) {
-            return null;
+            throw new IllegalArgumentException("Cart is inactive");
         }
 
         CartItem existing = cartItemRepository

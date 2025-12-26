@@ -26,12 +26,11 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Price must be positive");
         }
 
-        // Duplicate SKU check WITHOUT existsBySku
-        productRepository.findAll().forEach(p -> {
-            if (p.getSku().equals(product.getSku())) {
+        for (Product existing : productRepository.findAll()) {
+            if (existing.getSku().equals(product.getSku())) {
                 throw new IllegalArgumentException("Duplicate SKU");
             }
-        });
+        }
 
         return productRepository.save(product);
     }
@@ -47,10 +46,6 @@ public class ProductServiceImpl implements ProductService {
                 throw new IllegalArgumentException("Price must be positive");
             }
             existing.setPrice(updatedProduct.getPrice());
-        }
-
-        if (updatedProduct.getName() != null) {
-            existing.setName(updatedProduct.getName());
         }
 
         return productRepository.save(existing);

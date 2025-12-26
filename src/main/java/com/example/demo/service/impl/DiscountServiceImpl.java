@@ -12,9 +12,7 @@ import com.example.demo.service.DiscountService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,12 +58,9 @@ public class DiscountServiceImpl implements DiscountService {
 
         for (BundleRule rule : bundleRuleRepository.findAll()) {
 
-            if (Boolean.FALSE.equals(rule.getActive())) {
-                continue;
-            }
+            if (Boolean.FALSE.equals(rule.getActive())) continue;
 
-            Set<Long> required = List.of(rule.getRequiredProductIds().split(","))
-                    .stream()
+            Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .map(Long::valueOf)
