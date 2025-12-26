@@ -1,12 +1,14 @@
-package com.example.demo;
+package com.example.demo.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.List;
 
-@SpringBootApplication
-public class DemoApplication {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-    public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
-    }
+import com.example.demo.model.CartItem;
+
+@Repository
+public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+
+    List<CartItem> findByCartIdAndMinQuantity(Long cartId, int minQuantity);
 }
