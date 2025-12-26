@@ -1,10 +1,10 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.config.JwtTokenProvider;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.AuthService;
 import org.springframework.stereotype.Service;
 
