@@ -22,8 +22,8 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     @Override
     public BundleRule createRule(BundleRule rule) {
 
-        if (rule.getDiscountPercentage() == null ||
-                rule.getDiscountPercentage() < 1 ||
+        // discountPercentage is primitive double → no null check
+        if (rule.getDiscountPercentage() < 1 ||
                 rule.getDiscountPercentage() > 100) {
             throw new IllegalArgumentException("Invalid discount percentage");
         }
@@ -43,12 +43,16 @@ public class BundleRuleServiceImpl implements BundleRuleService {
         BundleRule existing = bundleRuleRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
 
-        if (updatedRule.getDiscountPercentage() != null) {
-            if (updatedRule.getDiscountPercentage() < 1 ||
-                    updatedRule.getDiscountPercentage() > 100) {
-                throw new IllegalArgumentException("Invalid discount percentage");
-            }
-            existing.setDiscountPercentage(updatedRule.getDiscountPercentage());
+        // Always validate primitive double
+        if (updatedRule.getDiscountPercentage() < 1 ||
+                updatedRule.getDiscountPercentage() > 100) {
+            throw new IllegalArgumentException("Invalid discount percentage");
+        }
+
+        existing.setDiscountPercentage(updatedRule.getDiscountPercentage());
+
+        if (updatedRule.getRuleName() != null) {
+            existing.setRuleName(updatedRule.getRuleName());
         }
 
         if (updatedRule.getRequiredProductIds() != null &&
