@@ -2,26 +2,32 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Cart;
 import com.example.demo.service.CartService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/carts")
+@RequestMapping("/carts")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
+    private final CartService cartService;
 
-    @PostMapping
-    public ResponseEntity<Cart> createCart(@RequestParam Long userId) {
-        Cart cart = cartService.createCart(userId);
-        return ResponseEntity.ok(cart);
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
     }
 
-    @GetMapping("/active/{userId}")
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<Cart> createCart(@PathVariable Long userId) {
+        Cart cart = cartService.createCart(userId);
+        return new ResponseEntity<>(cart, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/user/{userId}")
     public ResponseEntity<Cart> getActiveCart(@PathVariable Long userId) {
-        Cart cart = cartService.getActiveCartForUser(userId);
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(cartService.getActiveCartForUser(userId));
     }
 }

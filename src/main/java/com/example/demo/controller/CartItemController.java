@@ -1,48 +1,35 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.CartItemDto;
-import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
-import com.example.demo.model.Product;
 import com.example.demo.service.CartItemService;
-import com.example.demo.service.CartService;
-import com.example.demo.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/cart-items")
+@RequestMapping("/cart-items")
 public class CartItemController {
 
-    @Autowired
-    private CartItemService cartItemService;
+    private final CartItemService cartItemService;
 
-    @Autowired
-    private CartService cartService;
-
-    @Autowired
-    private ProductService productService;
+    public CartItemController(CartItemService cartItemService) {
+        this.cartItemService = cartItemService;
+    }
 
     @PostMapping
-    public ResponseEntity<CartItem> addItemToCart(@RequestBody CartItemDto dto) {
-        Cart cart = cartService.getActiveCartForUser(1L); // Simplified for demo
-        Product product = productService.getProductById(dto.getProductId());
-        
-        CartItem item = new CartItem();
-        item.setCart(cart);
-        item.setProduct(product);
-        item.setQuantity(dto.getQuantity());
-        
+    public ResponseEntity<CartItem> addItem(@RequestBody CartItem item) {
         CartItem saved = cartItemService.addItemToCart(item);
-        return ResponseEntity.ok(saved);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping("/cart/{cartId}")
-    public ResponseEntity<List<CartItem>> getItemsForCart(@PathVariable Long cartId) {
-        List<CartItem> items = cartItemService.getItemsForCart(cartId);
-        return ResponseEntity.ok(items);
+    public ResponseEntity<List<CartItem>> getItems(@PathVariable Long cartId) {
+        return ResponseEntity.ok(cartItemService.getItemsForCart(cartId));
     }
 }
