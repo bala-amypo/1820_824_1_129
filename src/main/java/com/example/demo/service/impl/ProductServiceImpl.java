@@ -6,6 +6,7 @@ import com.example.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -20,28 +21,39 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product createProduct(Product product) {
 
-        if (product.getPrice() <= 0) {
+        if (product.getPrice() == null ||
+                product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
 
-        if (productRepository.existsBySku(product.getSku())) {
-            throw new IllegalArgumentException("Duplicate SKU");
-        }
+        // Duplicate SKU check WITHOUT existsBySku
+        productRepository.findAll().forEach(p -> {
+            if (p.getSku().equals(product.getSku())) {
+                throw new IllegalArgumentException("Duplicate SKU");
+            }
+        });
 
         return productRepository.save(product);
     }
 
     @Override
-    public Product updateProductPrice(Long id, double price) {
-        if (price <= 0) {
-            throw new IllegalArgumentException("Price must be positive");
-        }
+    public Product updateProduct(Long id, Product updatedProduct) {
 
-        Product product = productRepository.findById(id)
+        Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        product.setPrice(price);
-        return productRepository.save(product);
+        if (updatedProduct.getPrice() != null) {
+            if (updatedProduct.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Price must be positive");
+            }
+            existing.setPrice(updatedProduct.getPrice());
+        }
+
+        if (updatedProduct.getName() != null) {
+            existing.setName(updatedProduct.getName());
+        }
+
+        return productRepository.save(existing);
     }
 
     @Override
