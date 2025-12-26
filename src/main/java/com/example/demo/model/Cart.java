@@ -1,10 +1,21 @@
 package com.example.demo.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "carts")
 public class Cart {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Long userId;
-    private boolean active = true;
+
+    private boolean active;
+
+    public Cart() {
+    }
 
     public Long getId() {
         return id;
@@ -22,7 +33,7 @@ public class Cart {
         this.userId = userId;
     }
 
-    public boolean getActive() {
+    public boolean isActive() {
         return active;
     }
 
