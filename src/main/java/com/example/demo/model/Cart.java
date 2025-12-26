@@ -4,39 +4,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
-public class CartItem {
+public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long cartId;
-
-    private Long productId;
-
-    private int quantity;
-
-    @ManyToOne
-    @JoinColumn(name = "productId", insertable = false, updatable = false)
-    private Product product;
-
     public Long getId() {
         return id;
-    }
-
-    public Long getCartId() {
-        return cartId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public Product getProduct() {
-        return product;
     }
 }

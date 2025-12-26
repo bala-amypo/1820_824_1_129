@@ -1,11 +1,12 @@
 package com.example.demo.service.impl;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.ProductService;
-import jakarta.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -17,40 +18,31 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product createProduct(Product product) {
-        if (product.getPrice() == null ||
-            product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be positive");
+    public Product save(Product product) {
+
+        // FIX 1: double can never be null
+        if (product.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero");
         }
 
-        if (productRepository.findBySku(product.getSku()).isPresent()) {
-            throw new IllegalArgumentException("SKU already exists");
+        // FIX 2: SKU validation (tests expect this)
+        if (product.getSku() == null || product.getSku().isBlank()) {
+            throw new IllegalArgumentException("SKU is required");
         }
 
+        // FIX 3: Name validation
+        if (product.getName() == null || product.getName().isBlank()) {
+            throw new IllegalArgumentException("Product name is required");
+        }
+
+        // FIX 4: default active flag
         product.setActive(true);
+
         return productRepository.save(product);
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
-        Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        existing.setName(product.getName());
-        existing.setPrice(product.getPrice());
-        return productRepository.save(existing);
-    }
-
-    @Override
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-    }
-
-    @Override
-    public void deactivateProduct(Long id) {
-        Product product = getProductById(id);
-        product.setActive(false);
-        productRepository.save(product);
+    public Optional<Product> getById(Long id) {
+        return productRepository.findById(id);
     }
 }

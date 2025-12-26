@@ -18,9 +18,9 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     @Override
-    public double calculateDiscount(Long cartId) {
-        List<CartItem> items = cartItemRepository.findByCartId(cartId);
+    public double evaluateDiscounts(Long cartId) {
 
+        List<CartItem> items = cartItemRepository.findByCartId(cartId);
         double discount = 0.0;
 
         for (CartItem ci : items) {
