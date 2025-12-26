@@ -1,0 +1,72 @@
+package com.example.demo.service.impl;
+
+import com.example.demo.model.Cart;
+import com.example.demo.model.CartItem;
+import com.example.demo.repository.CartItemRepository;
+import com.example.demo.repository.CartRepository;
+import com.example.demo.service.CartItemService;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@Transactional
+public class CartItemServiceImpl implements CartItemService {
+
+    private final CartItemRepository cartItemRepository;
+    private final CartRepository cartRepository;
+
+    public CartItemServiceImpl(
+            CartItemRepository cartItemRepository,
+            CartRepository cartRepository
+    ) {
+        this.cartItemRepository = cartItemRepository;
+        this.cartRepository = cartRepository;
+    }
+
+    @Override
+    public CartItem addItemToCart(CartItem item) {
+        if (item.getCart() == null || item.getCart().getId() == null) {
+            throw new IllegalArgumentException("Cart ID must be provided");
+        }
+
+        Cart cart = cartRepository.findById(item.getCart().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+
+        if (Boolean.FALSE.equals(cart.getActive())) {
+            throw new IllegalStateException("Cart is inactive");
+        }
+
+        return cartItemRepository.save(item);
+    }
+
+    @Override
+    public void removeItem(Long itemId) {
+        if (!cartItemRepository.existsById(itemId)) {
+            throw new IllegalArgumentException("Cart item not found");
+        }
+        cartItemRepository.deleteById(itemId);
+    }
+
+    @Override
+    public CartItem updateItem(Long itemId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than zero");
+        }
+
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart item not found"));
+
+        item.setQuantity(quantity);
+        return cartItemRepository.save(item);
+    }
+
+    @Override
+    public List<CartItem> getItemsForCart(Long cartId) {
+        if (!cartRepository.existsById(cartId)) {
+            throw new IllegalArgumentException("Cart not found");
+        }
+        return cartItemRepository.findByCartId(cartId);
+    }
+}
