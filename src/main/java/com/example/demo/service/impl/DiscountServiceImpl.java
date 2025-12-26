@@ -41,11 +41,10 @@ public class DiscountServiceImpl implements DiscountService {
     @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
 
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        Cart cart = cartRepository.findById(cartId).orElse(null);
 
-        if (Boolean.FALSE.equals(cart.getActive())) {
-            throw new IllegalStateException("Cart is inactive");
+        if (cart == null || Boolean.FALSE.equals(cart.getActive())) {
+            return List.of();
         }
 
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
@@ -54,7 +53,6 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         Set<Long> productIds = items.stream()
-                .filter(i -> i.getProduct() != null)
                 .map(i -> i.getProduct().getId())
                 .collect(Collectors.toSet());
 
@@ -66,27 +64,18 @@ public class DiscountServiceImpl implements DiscountService {
                 continue;
             }
 
-            if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
-                continue;
-            }
-
-            Set<Long> requiredProductIds = List.of(rule.getRequiredProductIds().split(","))
+            Set<Long> required = List.of(rule.getRequiredProductIds().split(","))
                     .stream()
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
                     .map(Long::valueOf)
                     .collect(Collectors.toSet());
 
-            if (requiredProductIds.isEmpty()) {
-                continue;
-            }
-
-            if (productIds.containsAll(requiredProductIds)) {
-                DiscountApplication application = new DiscountApplication();
-                application.setCart(cart);
-                application.setBundleRule(rule);
-
-                results.add(discountApplicationRepository.save(application));
+            if (productIds.containsAll(required)) {
+                DiscountApplication app = new DiscountApplication();
+                app.setCart(cart);
+                app.setBundleRule(rule);
+                results.add(discountApplicationRepository.save(app));
             }
         }
 
@@ -95,9 +84,6 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<DiscountApplication> getApplicationsForCart(Long cartId) {
-        if (!cartRepository.existsById(cartId)) {
-            throw new IllegalArgumentException("Cart not found");
-        }
         return discountApplicationRepository.findByCartId(cartId);
     }
 

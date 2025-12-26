@@ -1,102 +1,53 @@
-package com.example.demo.service.impl;
+package com.example.demo.model;
 
-import com.example.demo.model.BundleRule;
-import com.example.demo.repository.BundleRuleRepository;
-import com.example.demo.service.BundleRuleService;
+import jakarta.persistence.*;
 
-import jakarta.transaction.Transactional;
+@Entity
+public class BundleRule {
 
-import org.springframework.stereotype.Service;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-import java.util.List;
-import java.util.stream.Collectors;
+    private String requiredProductIds;
 
-@Service
-@Transactional
-public class BundleRuleServiceImpl implements BundleRuleService {
+    private Integer discountPercentage;
 
-    private final BundleRuleRepository bundleRuleRepository;
+    private Boolean active = true;
 
-    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
-        this.bundleRuleRepository = bundleRuleRepository;
+    public boolean isDiscountPercentageValid() {
+        return discountPercentage != null &&
+                discountPercentage >= 1 &&
+                discountPercentage <= 100;
     }
 
-    @Override
-    public BundleRule createRule(BundleRule rule) {
+    // getters and setters
 
-        if (rule.getDiscountPercentage() == null ||
-                rule.getDiscountPercentage() < 1 ||
-                rule.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Discount percentage must be between 1 and 100");
-        }
-
-        if (rule.getRequiredProductIds() == null ||
-                rule.getRequiredProductIds().isBlank()) {
-            throw new IllegalArgumentException("Required product IDs cannot be empty");
-        }
-
-        String cleaned = rule.getRequiredProductIds().trim();
-        if (cleaned.replace(",", "").isBlank()) {
-            throw new IllegalArgumentException("Invalid product ID list");
-        }
-
-        rule.setRequiredProductIds(cleaned);
-        rule.setActive(true);
-
-        return bundleRuleRepository.save(rule);
+    public Long getId() {
+        return id;
     }
 
-    @Override
-    public BundleRule updateRule(Long id, BundleRule updatedRule) {
-
-        BundleRule existing = bundleRuleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
-
-        if (updatedRule.getDiscountPercentage() != null) {
-            if (updatedRule.getDiscountPercentage() < 1 ||
-                    updatedRule.getDiscountPercentage() > 100) {
-                throw new IllegalArgumentException("Discount percentage must be between 1 and 100");
-            }
-            existing.setDiscountPercentage(updatedRule.getDiscountPercentage());
-        }
-
-        if (updatedRule.getRequiredProductIds() != null &&
-                !updatedRule.getRequiredProductIds().isBlank()) {
-
-            String cleaned = updatedRule.getRequiredProductIds().trim();
-            if (cleaned.replace(",", "").isBlank()) {
-                throw new IllegalArgumentException("Invalid product ID list");
-            }
-            existing.setRequiredProductIds(cleaned);
-        }
-
-        return bundleRuleRepository.save(existing);
+    public String getRequiredProductIds() {
+        return requiredProductIds;
     }
 
-    @Override
-    public void deactivateRule(Long ruleId) {
-        BundleRule rule = bundleRuleRepository.findById(ruleId)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
-
-        if (Boolean.FALSE.equals(rule.getActive())) {
-            return;
-        }
-
-        rule.setActive(false);
-        bundleRuleRepository.save(rule);
+    public void setRequiredProductIds(String requiredProductIds) {
+        this.requiredProductIds = requiredProductIds;
     }
 
-    @Override
-    public List<BundleRule> getActiveRules() {
-        return bundleRuleRepository.findAll()
-                .stream()
-                .filter(r -> Boolean.TRUE.equals(r.getActive()))
-                .collect(Collectors.toList());
+    public Integer getDiscountPercentage() {
+        return discountPercentage;
     }
 
-    @Override
-    public BundleRule getRuleById(Long id) {
-        return bundleRuleRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
+    public void setDiscountPercentage(Integer discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

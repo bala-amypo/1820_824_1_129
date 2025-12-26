@@ -26,14 +26,10 @@ public class CartItemServiceImpl implements CartItemService {
         this.cartRepository = cartRepository;
     }
 
-    /**
-     * ✅ REQUIRED BY TESTS
-     * Convenience method that delegates to addItem(...)
-     */
+    // Used by tests
     public CartItem addItemToCart(CartItem item) {
-
         if (item == null || item.getCart() == null || item.getProduct() == null) {
-            throw new IllegalArgumentException("Cart, product and quantity must be provided");
+            throw new IllegalArgumentException("Invalid cart item");
         }
 
         return addItem(
@@ -43,21 +39,30 @@ public class CartItemServiceImpl implements CartItemService {
         );
     }
 
-    /**
-     * ✅ REQUIRED BY INTERFACE
-     */
     @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
+            throw new IllegalArgumentException("Quantity must be positive");
         }
 
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+        Cart cart = cartRepository.findById(cartId).orElse(null);
+
+        if (cart == null) {
+            return null;
+        }
 
         if (Boolean.FALSE.equals(cart.getActive())) {
-            throw new IllegalStateException("Cart is inactive");
+            return null;
+        }
+
+        CartItem existing = cartItemRepository
+                .findByCartIdAndProductId(cartId, productId)
+                .orElse(null);
+
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + quantity);
+            return cartItemRepository.save(existing);
         }
 
         CartItem item = new CartItem();
@@ -73,16 +78,13 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void removeItem(Long itemId) {
-        if (!cartItemRepository.existsById(itemId)) {
-            throw new IllegalArgumentException("Cart item not found");
-        }
         cartItemRepository.deleteById(itemId);
     }
 
     @Override
     public CartItem updateItem(Long itemId, Integer quantity) {
         if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero");
+            throw new IllegalArgumentException("Quantity must be positive");
         }
 
         CartItem item = cartItemRepository.findById(itemId)
@@ -95,7 +97,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public List<CartItem> getItemsForCart(Long cartId) {
         if (!cartRepository.existsById(cartId)) {
-            throw new IllegalArgumentException("Cart not found");
+            return List.of();
         }
         return cartItemRepository.findByCartId(cartId);
     }
