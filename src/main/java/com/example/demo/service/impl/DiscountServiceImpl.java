@@ -1,90 +1,61 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.BundleRule;
-import com.example.demo.model.Cart;
-import com.example.demo.model.CartItem;
-import com.example.demo.model.DiscountApplication;
-import com.example.demo.repository.BundleRuleRepository;
-import com.example.demo.repository.CartItemRepository;
-import com.example.demo.repository.CartRepository;
-import com.example.demo.repository.DiscountApplicationRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class DiscountServiceImpl implements DiscountService {
 
-    private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final BundleRuleRepository bundleRuleRepository;
-    private final DiscountApplicationRepository discountApplicationRepository;
+    private final CartItemRepository cartItemRepo;
+    private final BundleRuleRepository ruleRepo;
+    private final DiscountApplicationRepository discountRepo;
 
-    public DiscountServiceImpl(
-            CartRepository cartRepository,
-            CartItemRepository cartItemRepository,
-            BundleRuleRepository bundleRuleRepository,
-            DiscountApplicationRepository discountApplicationRepository
-    ) {
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.bundleRuleRepository = bundleRuleRepository;
-        this.discountApplicationRepository = discountApplicationRepository;
+    public DiscountServiceImpl(CartItemRepository cartItemRepo,
+                               BundleRuleRepository ruleRepo,
+                               DiscountApplicationRepository discountRepo) {
+        this.cartItemRepo = cartItemRepo;
+        this.ruleRepo = ruleRepo;
+        this.discountRepo = discountRepo;
     }
 
     @Override
-    public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+    public List<DiscountApplication> evaluateDiscounts(Cart cart) {
 
-        Cart cart = cartRepository.findById(cartId).orElse(null);
-
-        if (cart == null || Boolean.FALSE.equals(cart.getActive())) {
+        if (!cart.getActive()) {
             return List.of();
         }
 
-        List<CartItem> items = cartItemRepository.findByCartId(cartId);
-        if (items.isEmpty()) {
-            return List.of();
-        }
-
+        List<CartItem> items = cartItemRepo.findByCart(cart);
         Set<Long> productIds = items.stream()
                 .map(i -> i.getProduct().getId())
                 .collect(Collectors.toSet());
 
-        List<DiscountApplication> results = new ArrayList<>();
+        List<DiscountApplication> applied = new ArrayList<>();
 
-        for (BundleRule rule : bundleRuleRepository.findAll()) {
+        for (BundleRule rule : ruleRepo.findAll()) {
 
-            if (Boolean.FALSE.equals(rule.getActive())) continue;
+            if (!rule.getActive()) continue;
 
-            Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
+            Set<Long> required = Arrays.stream(
+                    rule.getRequiredProductIds().split(","))
                     .map(String::trim)
-                    .filter(s -> !s.isEmpty())
                     .map(Long::valueOf)
                     .collect(Collectors.toSet());
 
             if (productIds.containsAll(required)) {
-                DiscountApplication app = new DiscountApplication();
-                app.setCart(cart);
-                app.setBundleRule(rule);
-                results.add(discountApplicationRepository.save(app));
+                DiscountApplication da = new DiscountApplication();
+                da.setCart(cart);
+                da.setRule(rule);
+                discountRepo.save(da);
+                applied.add(da);
             }
         }
 
-        return results;
-    }
-
-    @Override
-    public List<DiscountApplication> getApplicationsForCart(Long cartId) {
-        return discountApplicationRepository.findByCartId(cartId);
-    }
-
-    @Override
-    public DiscountApplication getApplicationById(Long id) {
-        return discountApplicationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Discount application not found"));
+        return applied;
     }
 }
