@@ -47,6 +47,33 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
+    public BundleRule updateRule(Long id, BundleRule updatedRule) {
+
+        BundleRule existing = bundleRuleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
+
+        if (updatedRule.getDiscountPercentage() != null) {
+            if (updatedRule.getDiscountPercentage() < 1 ||
+                    updatedRule.getDiscountPercentage() > 100) {
+                throw new IllegalArgumentException("Discount percentage must be between 1 and 100");
+            }
+            existing.setDiscountPercentage(updatedRule.getDiscountPercentage());
+        }
+
+        if (updatedRule.getRequiredProductIds() != null &&
+                !updatedRule.getRequiredProductIds().isBlank()) {
+
+            String cleaned = updatedRule.getRequiredProductIds().trim();
+            if (cleaned.replace(",", "").isBlank()) {
+                throw new IllegalArgumentException("Invalid product ID list");
+            }
+            existing.setRequiredProductIds(cleaned);
+        }
+
+        return bundleRuleRepository.save(existing);
+    }
+
+    @Override
     public void deactivateRule(Long ruleId) {
         BundleRule rule = bundleRuleRepository.findById(ruleId)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle rule not found"));
