@@ -9,29 +9,38 @@ import java.util.List;
 
 @Service
 public class BundleRuleServiceImpl implements BundleRuleService {
+private final BundleRuleRepository bundleRuleRepository;
 
-    private final BundleRuleRepository bundleRuleRepository;
+public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
+    this.bundleRuleRepository = bundleRuleRepository;
+}
 
-    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
-        this.bundleRuleRepository = bundleRuleRepository;
+@Override
+public BundleRule create(BundleRule rule) {
+
+    if (rule.getDiscountPercentage() < 0 || rule.getDiscountPercentage() > 100) {
+        throw new IllegalArgumentException("Invalid discount");
     }
 
-    @Override
-    public BundleRule create(BundleRule rule) {
-
-        if (rule.getDiscountPercentage() < 0 || rule.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Discount must be between 0 and 100");
-        }
-
-        if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
-            throw new IllegalArgumentException("Required products cannot be empty");
-        }
-
-        return bundleRuleRepository.save(rule);
+    if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().trim().isEmpty()) {
+        throw new IllegalArgumentException("Required products cannot be empty");
     }
 
-    @Override
-    public List<BundleRule> getAll() {
-        return bundleRuleRepository.findAll();
+    rule.setActive(true);
+    return bundleRuleRepository.save(rule);
+}
+
+@Override
+public void deactivateRule(Long id) {
+    BundleRule rule = bundleRuleRepository.findById(id).orElse(null);
+    if (rule != null) {
+        rule.setActive(false);
+        bundleRuleRepository.save(rule);
     }
+}
+
+@Override
+public List<BundleRule> getAll() {
+    return bundleRuleRepository.findAll();
+}
 }
