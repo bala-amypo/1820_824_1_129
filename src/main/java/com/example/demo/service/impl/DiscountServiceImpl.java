@@ -12,7 +12,6 @@ import com.example.demo.service.DiscountService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,47 +37,39 @@ public DiscountServiceImpl(
 
 @Override
 public List<DiscountApplication> evaluateDiscounts(Long cartId) {
-
     Cart cart = cartRepository.findById(cartId).orElse(null);
     if (cart == null || !cart.getActive()) {
         return List.of();
     }
 
     List<CartItem> items = cartItemRepository.findByCartId(cartId);
-    if (items.isEmpty()) {
-        return List.of();
-    }
-
-    Set<Long> cartProductIds = items.stream()
+    Set<Long> productIds = items.stream()
             .map(i -> i.getProduct().getId())
             .collect(Collectors.toSet());
 
     List<DiscountApplication> results = new ArrayList<>();
 
     for (BundleRule rule : bundleRuleRepository.findAll()) {
+        if (!rule.getActive()) continue;
 
-        if (!rule.getActive()) {
-            continue;
-        }
-
-        Set<Long> requiredIds = Arrays.stream(rule.getRequiredProductIds().split(","))
-                .map(String::trim)
-                .map(Long::valueOf)
-                .collect(Collectors.toSet());
-
-        if (cartProductIds.containsAll(requiredIds)) {
+        Set<Long> required = rule.getRequiredProductIdSet();
+        if (productIds.containsAll(required)) {
             DiscountApplication app = new DiscountApplication();
             app.setCart(cart);
             app.setBundleRule(rule);
             results.add(app);
         }
     }
-
     return results;
 }
 
 @Override
 public List<DiscountApplication> getApplicationsForCart(Long cartId) {
     return discountApplicationRepository.findByCartId(cartId);
+}
+
+@Override
+public DiscountApplication getApplicationById(Long id) {
+    return discountApplicationRepository.findById(id).orElse(null);
 }
 }
