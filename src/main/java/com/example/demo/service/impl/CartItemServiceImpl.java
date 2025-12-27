@@ -2,8 +2,10 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.Cart;
 import com.example.demo.model.CartItem;
+import com.example.demo.model.Product;
 import com.example.demo.repository.CartItemRepository;
 import com.example.demo.repository.CartRepository;
+import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.CartItemService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -15,43 +17,62 @@ public class CartItemServiceImpl implements CartItemService {
 
     private final CartItemRepository cartItemRepo;
     private final CartRepository cartRepo;
+    private final ProductRepository productRepo;
 
     public CartItemServiceImpl(
             CartItemRepository cartItemRepo,
-            CartRepository cartRepo
+            CartRepository cartRepo,
+            ProductRepository productRepo
     ) {
         this.cartItemRepo = cartItemRepo;
         this.cartRepo = cartRepo;
+        this.productRepo = productRepo;
     }
 
-    // ✅ REQUIRED BY TESTS
+    // ✅ REQUIRED BY INTERFACE
     @Override
-    public CartItem addItemToCart(CartItem item) {
-        if (item.getQuantity() == null || item.getQuantity() <= 0) {
+    public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
 
-        Cart cart = cartRepo.findById(item.getCart().getId())
+        Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
 
         if (!cart.getActive()) {
             throw new IllegalArgumentException("Cart is inactive");
         }
 
-        // aggregate quantity if same product exists
-        for (CartItem existing : cartItemRepo.findAll()) {
-            if (existing.getCart().getId().equals(item.getCart().getId())
-                    && existing.getProduct().getId().equals(item.getProduct().getId())) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-                existing.setQuantity(existing.getQuantity() + item.getQuantity());
+        for (CartItem existing : cartItemRepo.findAll()) {
+            if (existing.getCart().getId().equals(cartId)
+                    && existing.getProduct().getId().equals(productId)) {
+
+                existing.setQuantity(existing.getQuantity() + quantity);
                 return cartItemRepo.save(existing);
             }
         }
 
+        CartItem item = new CartItem();
+        item.setCart(cart);
+        item.setProduct(product);
+        item.setQuantity(quantity);
+
         return cartItemRepo.save(item);
     }
 
-    // ✅ REQUIRED BY CONTROLLER
+    // ✅ REQUIRED BY TESTS
+    @Override
+    public CartItem addItemToCart(CartItem item) {
+        return addItem(
+                item.getCart().getId(),
+                item.getProduct().getId(),
+                item.getQuantity()
+        );
+    }
+
     @Override
     public CartItem updateItem(Long itemId, Integer quantity) {
         if (quantity == null || quantity <= 0) {
@@ -65,7 +86,6 @@ public class CartItemServiceImpl implements CartItemService {
         return cartItemRepo.save(item);
     }
 
-    // ✅ REQUIRED BY CONTROLLER
     @Override
     public List<CartItem> getItemsForCart(Long cartId) {
         return cartItemRepo.findAll().stream()
