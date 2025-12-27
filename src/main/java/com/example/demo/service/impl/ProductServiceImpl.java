@@ -12,18 +12,19 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository productRepository;
+    private final ProductRepository repo;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public ProductServiceImpl(ProductRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public Product createProduct(Product product) {
-        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (product.getPrice() == null ||
+            product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
-        return productRepository.save(product);
+        return repo.save(product);
     }
 
     @Override
@@ -32,29 +33,28 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Price must be positive");
         }
 
-        Product product = productRepository.findById(id)
+        Product product = repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         product.setPrice(BigDecimal.valueOf(price));
-        return productRepository.save(product);
+        return repo.save(product);
     }
 
     @Override
     public Product getProductById(Long id) {
-        return productRepository.findById(id)
+        return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
     @Override
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return repo.findAll();
     }
 
     @Override
     public void deactivateProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        Product product = getProductById(id);
         product.setActive(false);
-        productRepository.save(product);
+        repo.save(product);
     }
 }
