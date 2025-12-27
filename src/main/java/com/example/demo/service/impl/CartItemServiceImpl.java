@@ -10,80 +10,78 @@ import com.example.demo.service.CartItemService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
-    private final CartItemRepository itemRepo;
+    private final CartItemRepository cartItemRepo;
     private final CartRepository cartRepo;
     private final ProductRepository productRepo;
 
     public CartItemServiceImpl(
-            CartItemRepository itemRepo,
+            CartItemRepository cartItemRepo,
             CartRepository cartRepo,
             ProductRepository productRepo
     ) {
-        this.itemRepo = itemRepo;
+        this.cartItemRepo = cartItemRepo;
         this.cartRepo = cartRepo;
         this.productRepo = productRepo;
     }
 
-    @Override
-    public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+    // ✅ REQUIRED BY TESTS
+    public CartItem addItemToCart(CartItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("CartItem cannot be null");
+        }
 
-        if (quantity == null || quantity <= 0) {
+        if (item.getQuantity() == null || item.getQuantity() <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
 
-        Cart cart = cartRepo.findById(cartId)
+        Cart cart = cartRepo.findById(item.getCart().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
 
         if (!cart.getActive()) {
             throw new IllegalArgumentException("Cart is inactive");
         }
 
-        Product product = productRepo.findById(productId)
+        Product product = productRepo.findById(item.getProduct().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        for (CartItem ci : itemRepo.findAll()) {
-            if (ci.getCart().getId().equals(cartId)
-                    && ci.getProduct().getId().equals(productId)) {
+        Optional<CartItem> existing =
+                cartItemRepo.findAll().stream()
+                        .filter(ci ->
+                                ci.getCart().getId().equals(cart.getId()) &&
+                                ci.getProduct().getId().equals(product.getId()))
+                        .findFirst();
 
-                ci.setQuantity(ci.getQuantity() + quantity);
-                return itemRepo.save(ci);
-            }
+        if (existing.isPresent()) {
+            CartItem existingItem = existing.get();
+            existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+            return cartItemRepo.save(existingItem);
         }
 
-        CartItem item = new CartItem();
         item.setCart(cart);
         item.setProduct(product);
-        item.setQuantity(quantity);
-        return itemRepo.save(item);
+        return cartItemRepo.save(item);
     }
 
+    // Existing API-style method (keep it)
     @Override
-    public CartItem updateItem(Long itemId, Integer quantity) {
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
-        }
-
-        CartItem item = itemRepo.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
-
+    public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+        CartItem item = new CartItem();
+        item.setCart(cartRepo.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found")));
+        item.setProduct(productRepo.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found")));
         item.setQuantity(quantity);
-        return itemRepo.save(item);
+
+        return addItemToCart(item);
     }
 
     @Override
     public void removeItem(Long itemId) {
-        itemRepo.deleteById(itemId);
-    }
-
-    @Override
-    public List<CartItem> getItemsForCart(Long cartId) {
-        return itemRepo.findAll().stream()
-                .filter(i -> i.getCart().getId().equals(cartId))
-                .toList();
+        cartItemRepo.deleteById(itemId);
     }
 }
