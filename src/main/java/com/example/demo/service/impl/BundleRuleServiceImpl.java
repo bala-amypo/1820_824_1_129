@@ -20,11 +20,13 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     @Override
     public BundleRule createRule(BundleRule rule) {
 
-        if (rule.getDiscountPercentage() < 1 || rule.getDiscountPercentage() > 100) {
+        if (rule.getDiscountPercentage() <= 0 ||
+            rule.getDiscountPercentage() > 100) {
             throw new IllegalArgumentException("Invalid discount");
         }
 
-        if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
+        if (rule.getRequiredProductIds() == null ||
+            rule.getRequiredProductIds().isBlank()) {
             throw new IllegalArgumentException("Required products missing");
         }
 

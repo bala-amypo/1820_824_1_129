@@ -28,12 +28,10 @@ public class CartItemServiceImpl implements CartItemService {
                 .orElseThrow(IllegalArgumentException::new);
 
         if (!cart.getActive()) {
-            return false; // REQUIRED by test
+            throw new IllegalArgumentException("Cart inactive");
         }
 
-        List<CartItem> items = itemRepo.findAll();
-
-        for (CartItem ci : items) {
+        for (CartItem ci : itemRepo.findAll()) {
             if (ci.getCart().getId().equals(cart.getId()) &&
                 ci.getProduct().getId().equals(item.getProduct().getId())) {
 
