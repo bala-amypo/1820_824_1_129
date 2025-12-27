@@ -33,11 +33,9 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     @Override
     public BundleRule updateRule(Long id, BundleRule rule) {
         BundleRule existing = getRuleById(id);
-
         existing.setRuleName(rule.getRuleName());
         existing.setDiscountPercentage(rule.getDiscountPercentage());
         existing.setRequiredProductIds(rule.getRequiredProductIds());
-
         return repo.save(existing);
     }
 
@@ -50,13 +48,6 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     @Override
     public List<BundleRule> getAllRules() {
         return repo.findAll();
-    }
-
-    @Override
-    public List<BundleRule> getActiveRules() {
-        return repo.findAll().stream()
-                .filter(BundleRule::getActive)
-                .toList();
     }
 
     @Override

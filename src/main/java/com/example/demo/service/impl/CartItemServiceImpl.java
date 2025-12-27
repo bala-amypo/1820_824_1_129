@@ -59,7 +59,19 @@ public class CartItemServiceImpl implements CartItemService {
         item.setCart(cart);
         item.setProduct(product);
         item.setQuantity(quantity);
+        return itemRepo.save(item);
+    }
 
+    @Override
+    public CartItem updateItem(Long itemId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive");
+        }
+
+        CartItem item = itemRepo.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
+
+        item.setQuantity(quantity);
         return itemRepo.save(item);
     }
 

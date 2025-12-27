@@ -28,24 +28,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product updateProduct(Long id, Product updated) {
-        Product existing = getProductById(id);
-
-        existing.setName(updated.getName());
-        existing.setCategory(updated.getCategory());
-        existing.setSku(updated.getSku());
-
-        if (updated.getPrice() != null) {
-            if (updated.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Price must be positive");
-            }
-            existing.setPrice(updated.getPrice());
-        }
-
-        return repo.save(existing);
-    }
-
-    @Override
     public Product updateProductPrice(Long id, double price) {
         if (price <= 0) {
             throw new IllegalArgumentException("Price must be positive");
