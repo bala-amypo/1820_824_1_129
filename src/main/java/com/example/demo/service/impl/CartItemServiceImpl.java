@@ -29,7 +29,6 @@ public class CartItemServiceImpl implements CartItemService {
         this.productRepo = productRepo;
     }
 
-    // ✅ REQUIRED BY INTERFACE
     @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
         if (quantity == null || quantity <= 0) {
@@ -46,12 +45,12 @@ public class CartItemServiceImpl implements CartItemService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        for (CartItem existing : cartItemRepo.findAll()) {
-            if (existing.getCart().getId().equals(cartId)
-                    && existing.getProduct().getId().equals(productId)) {
+        for (CartItem item : cartItemRepo.findAll()) {
+            if (item.getCart().getId().equals(cartId)
+                    && item.getProduct().getId().equals(productId)) {
 
-                existing.setQuantity(existing.getQuantity() + quantity);
-                return cartItemRepo.save(existing);
+                item.setQuantity(item.getQuantity() + quantity);
+                return cartItemRepo.save(item);
             }
         }
 
@@ -59,11 +58,9 @@ public class CartItemServiceImpl implements CartItemService {
         item.setCart(cart);
         item.setProduct(product);
         item.setQuantity(quantity);
-
         return cartItemRepo.save(item);
     }
 
-    // ✅ REQUIRED BY TESTS
     @Override
     public CartItem addItemToCart(CartItem item) {
         return addItem(
@@ -74,13 +71,13 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public CartItem updateItem(Long itemId, Integer quantity) {
+    public CartItem updateItem(Long id, Integer quantity) {
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
 
-        CartItem item = cartItemRepo.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("CartItem not found"));
+        CartItem item = cartItemRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Item not found"));
 
         item.setQuantity(quantity);
         return cartItemRepo.save(item);
@@ -94,7 +91,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public void removeItem(Long itemId) {
-        cartItemRepo.deleteById(itemId);
+    public void removeItem(Long id) {
+        cartItemRepo.deleteById(id);
     }
 }

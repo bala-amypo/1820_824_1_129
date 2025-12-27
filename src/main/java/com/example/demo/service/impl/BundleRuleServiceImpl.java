@@ -11,56 +11,40 @@ import java.util.List;
 @Service
 public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private final BundleRuleRepository bundleRuleRepository;
+    private final BundleRuleRepository repo;
 
-    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
-        this.bundleRuleRepository = bundleRuleRepository;
+    public BundleRuleServiceImpl(BundleRuleRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public BundleRule createRule(BundleRule rule) {
         if (!rule.isDiscountPercentageValid()) {
-            throw new IllegalArgumentException("Invalid discount percentage");
+            throw new IllegalArgumentException("Invalid discount range");
         }
-
         if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
             throw new IllegalArgumentException("Required products cannot be empty");
         }
-
-        return bundleRuleRepository.save(rule);
-    }
-
-    @Override
-    public BundleRule updateRule(Long id, BundleRule rule) {
-        BundleRule existing = getRuleById(id);
-
-        if (!rule.isDiscountPercentageValid()) {
-            throw new IllegalArgumentException("Invalid discount percentage");
+        if (rule.getMinQuantity() == null || rule.getMinQuantity() <= 0) {
+            throw new IllegalArgumentException("Min quantity must be positive");
         }
-
-        existing.setRuleName(rule.getRuleName());
-        existing.setDiscountPercentage(rule.getDiscountPercentage());
-        existing.setRequiredProductIds(rule.getRequiredProductIds());
-
-        return bundleRuleRepository.save(existing);
-    }
-
-    @Override
-    public void deactivateRule(Long id) {
-        BundleRule rule = getRuleById(id);
-        rule.setActive(false);
-        bundleRuleRepository.save(rule);
+        return repo.save(rule);
     }
 
     @Override
     public BundleRule getRuleById(Long id) {
-        return bundleRuleRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Rule not found"));
+        return repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
+    }
+
+    @Override
+    public List<BundleRule> getAllRules() {
+        return repo.findAll();
     }
 
     @Override
     public List<BundleRule> getActiveRules() {
-        return bundleRuleRepository.findAll().stream()
+        return repo.findAll().stream()
                 .filter(BundleRule::getActive)
                 .toList();
     }

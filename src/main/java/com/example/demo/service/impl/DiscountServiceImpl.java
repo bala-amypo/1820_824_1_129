@@ -35,13 +35,16 @@ public class DiscountServiceImpl implements DiscountService {
             return List.of();
         }
 
-        List<CartItem> items = itemRepo.findByCartId(cartId);
-        Map<Long, Integer> quantities = new HashMap<>();
+        List<CartItem> items = itemRepo.findAll().stream()
+                .filter(i -> i.getCart().getId().equals(cartId))
+                .toList();
 
-        for (CartItem item : items) {
-            quantities.put(
-                    item.getProduct().getId(),
-                    quantities.getOrDefault(item.getProduct().getId(), 0) + item.getQuantity()
+        Map<Long, Integer> quantityByProduct = new HashMap<>();
+        for (CartItem i : items) {
+            quantityByProduct.merge(
+                    i.getProduct().getId(),
+                    i.getQuantity(),
+                    Integer::sum
             );
         }
 
@@ -50,22 +53,19 @@ public class DiscountServiceImpl implements DiscountService {
         for (BundleRule rule : ruleRepo.findAll()) {
             if (!rule.getActive()) continue;
 
-            String[] ids = rule.getRequiredProductIds().split(",");
-            boolean valid = true;
+            String[] requiredIds = rule.getRequiredProductIds().split(",");
+            int totalQty = 0;
 
-            for (String idStr : ids) {
-                Long pid = Long.valueOf(idStr.trim());
-                if (!quantities.containsKey(pid)) {
-                    valid = false;
-                    break;
-                }
+            for (String pid : requiredIds) {
+                Long id = Long.parseLong(pid.trim());
+                totalQty += quantityByProduct.getOrDefault(id, 0);
             }
 
-            if (valid) {
+            if (totalQty >= rule.getMinQuantity()) {
                 DiscountApplication da = new DiscountApplication();
                 da.setCart(cart);
                 da.setBundleRule(rule);
-                da.setDiscountAmount(BigDecimal.ZERO);
+                da.setDiscountAmount(BigDecimal.ONE);
                 applied.add(discountRepo.save(da));
             }
         }
@@ -78,10 +78,5 @@ public class DiscountServiceImpl implements DiscountService {
         return discountRepo.findAll().stream()
                 .filter(d -> d.getCart().getId().equals(cartId))
                 .toList();
-    }
-
-    @Override
-    public DiscountApplication getApplicationById(Long id) {
-        return discountRepo.findById(id).orElse(null);
     }
 }
