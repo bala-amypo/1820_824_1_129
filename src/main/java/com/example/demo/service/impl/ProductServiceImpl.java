@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
         return repo.save(existing);
     }
 
-    // ❗ NOT IN INTERFACE → NO @Override
+    
     public Product updateProductPrice(Long id, double price) {
         if (price <= 0) {
             throw new IllegalArgumentException("Price must be positive");

@@ -45,7 +45,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
     }
 
-    @Override
+    
     public List<BundleRule> getAllRules() {
         return repo.findAll();
     }
