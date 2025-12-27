@@ -33,6 +33,12 @@ public class DiscountServiceImpl implements DiscountService {
             return List.of();
         }
 
+        // clear old discounts for cart
+        discountRepo.findAll()
+                .stream()
+                .filter(d -> d.getCart().getId().equals(cart.getId()))
+                .forEach(discountRepo::delete);
+
         Set<Long> productIds = itemRepo.findAll()
                 .stream()
                 .filter(i -> i.getCart().getId().equals(cart.getId()))
@@ -42,11 +48,9 @@ public class DiscountServiceImpl implements DiscountService {
         List<DiscountApplication> result = new ArrayList<>();
 
         for (BundleRule rule : ruleRepo.findAll()) {
-
             if (!rule.getActive()) continue;
 
-            Set<Long> required = Arrays.stream(
-                    rule.getRequiredProductIds().split(","))
+            Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
                     .map(String::trim)
                     .map(Long::valueOf)
                     .collect(Collectors.toSet());
@@ -61,6 +65,12 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         return result;
+    }
+
+    @Override
+    public DiscountApplication getApplicationById(Long id) {
+        return discountRepo.findById(id)
+                .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override

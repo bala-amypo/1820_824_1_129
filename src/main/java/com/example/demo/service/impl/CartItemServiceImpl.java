@@ -46,6 +46,20 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    public void updateItem(Long itemId, Integer quantity) {
+
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+
+        CartItem item = itemRepo.findById(itemId)
+                .orElseThrow(IllegalArgumentException::new);
+
+        item.setQuantity(quantity);
+        itemRepo.save(item);
+    }
+
+    @Override
     public void removeItem(Long itemId) {
         itemRepo.deleteById(itemId);
     }

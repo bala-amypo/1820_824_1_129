@@ -36,8 +36,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(Long id, Product updated) {
 
-        Product existing = repo.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
+        Product existing = getProductById(id);
 
         if (updated.getName() != null) {
             existing.setName(updated.getName());
@@ -54,7 +53,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProduct(Long id) {
+    public Product getProductById(Long id) {
         return repo.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
     }
@@ -66,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deactivateProduct(Long id) {
-        Product p = getProduct(id);
+        Product p = getProductById(id);
         p.setActive(false);
         repo.save(p);
     }
