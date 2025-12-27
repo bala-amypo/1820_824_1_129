@@ -29,7 +29,7 @@ public class CartItemServiceImpl implements CartItemService {
     /* =========================================================
        REQUIRED BY TESTS
        ========================================================= */
-    public boolean addItemToCart(CartItem item) {
+    public CartItem addItemToCart(CartItem item) {
 
         if (item == null || item.getQuantity() == null || item.getQuantity() <= 0) {
             throw new IllegalArgumentException("Invalid quantity");
@@ -47,13 +47,11 @@ public class CartItemServiceImpl implements CartItemService {
                     && existing.getProduct().getId().equals(item.getProduct().getId())) {
 
                 existing.setQuantity(existing.getQuantity() + item.getQuantity());
-                itemRepo.save(existing);
-                return true;
+                return itemRepo.save(existing);
             }
         }
 
-        itemRepo.save(item);
-        return true;
+        return itemRepo.save(item);
     }
 
     /* =========================================================
