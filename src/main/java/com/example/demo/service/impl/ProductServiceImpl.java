@@ -12,39 +12,42 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository repo;
+    private final ProductRepository productRepository;
 
-    public ProductServiceImpl(ProductRepository repo) {
-        this.repo = repo;
+    public ProductServiceImpl(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @Override
     public Product createProduct(Product product) {
-        if (product.getPrice() == null ||
-                product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
-        return repo.save(product);
+
+        if (productRepository.findBySku(product.getSku()).isPresent()) {
+            throw new IllegalArgumentException("Duplicate SKU");
+        }
+
+        return productRepository.save(product);
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
+    public Product updateProduct(Long id, Product updated) {
         Product existing = getProductById(id);
 
-        if (product.getPrice() != null &&
-                product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (updated.getPrice() != null &&
+            updated.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
 
-        existing.setName(product.getName());
-        existing.setCategory(product.getCategory());
-        existing.setPrice(product.getPrice());
-        existing.setActive(product.getActive());
+        existing.setName(updated.getName());
+        existing.setCategory(updated.getCategory());
+        existing.setPrice(updated.getPrice());
 
-        return repo.save(existing);
+        return productRepository.save(existing);
     }
 
-    
+    @Override
     public Product updateProductPrice(Long id, double price) {
         if (price <= 0) {
             throw new IllegalArgumentException("Price must be positive");
@@ -52,24 +55,24 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = getProductById(id);
         product.setPrice(BigDecimal.valueOf(price));
-        return repo.save(product);
+        return productRepository.save(product);
     }
 
     @Override
     public Product getProductById(Long id) {
-        return repo.findById(id)
+        return productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
     @Override
     public List<Product> getAllProducts() {
-        return repo.findAll();
+        return productRepository.findAll();
     }
 
     @Override
     public void deactivateProduct(Long id) {
         Product product = getProductById(id);
         product.setActive(false);
-        repo.save(product);
+        productRepository.save(product);
     }
 }
