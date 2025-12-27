@@ -59,14 +59,14 @@ public class BundleRuleServiceImpl implements BundleRuleService {
         return repo.findAll();
     }
 
-    // ❌ NOT in interface → NO @Override
+    // NOT in interface → NO @Override
     public List<BundleRule> getActiveRules() {
         return repo.findAll().stream()
                 .filter(BundleRule::getActive)
                 .toList();
     }
 
-    @Override
+    // NOT in interface → NO @Override
     public void deactivateRule(Long id) {
         BundleRule rule = getRuleById(id);
         rule.setActive(false);
