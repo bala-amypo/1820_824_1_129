@@ -32,6 +32,23 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
+    public BundleRule updateRule(Long id, BundleRule rule) {
+        BundleRule existing = repo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
+
+        if (!rule.isDiscountPercentageValid()) {
+            throw new IllegalArgumentException("Invalid discount range");
+        }
+
+        existing.setRuleName(rule.getRuleName());
+        existing.setRequiredProductIds(rule.getRequiredProductIds());
+        existing.setDiscountPercentage(rule.getDiscountPercentage());
+        existing.setMinQuantity(rule.getMinQuantity());
+
+        return repo.save(existing);
+    }
+
+    @Override
     public BundleRule getRuleById(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
@@ -42,7 +59,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
         return repo.findAll();
     }
 
-    @Override
+    // ❌ NOT in interface → NO @Override
     public List<BundleRule> getActiveRules() {
         return repo.findAll().stream()
                 .filter(BundleRule::getActive)
