@@ -1,43 +1,34 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import java.sql.Timestamp;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "carts")
 public class Cart {
-
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @Column(nullable = false)
     private Long userId;
+    
+    @Column(nullable = false)
     private Boolean active = true;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
-
-    @PrePersist
-    public void onCreate() {
-        createdAt = new Timestamp(System.currentTimeMillis());
+    
+    public Cart() {}
+    
+    public Cart(Long userId) {
+        this.userId = userId;
+        this.active = true;
     }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = new Timestamp(System.currentTimeMillis());
-    }
-
+    
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
+    
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
-
+    
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
-
-    public Timestamp getCreatedAt() { return createdAt; }
-    public Timestamp getUpdatedAt() { return updatedAt; }
 }
