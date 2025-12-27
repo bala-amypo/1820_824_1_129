@@ -26,27 +26,56 @@ public class CartItemServiceImpl implements CartItemService {
         this.productRepo = productRepo;
     }
 
-    /**
-     * REQUIRED BY INTERFACE
-     */
+    /* =========================================================
+       REQUIRED BY TESTS
+       ========================================================= */
+    public boolean addItemToCart(CartItem item) {
+
+        if (item == null || item.getQuantity() == null || item.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Invalid quantity");
+        }
+
+        Cart cart = cartRepo.findById(item.getCart().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+
+        if (!cart.getActive()) {
+            throw new IllegalArgumentException("Cart inactive");
+        }
+
+        for (CartItem existing : itemRepo.findAll()) {
+            if (existing.getCart().getId().equals(cart.getId())
+                    && existing.getProduct().getId().equals(item.getProduct().getId())) {
+
+                existing.setQuantity(existing.getQuantity() + item.getQuantity());
+                itemRepo.save(existing);
+                return true;
+            }
+        }
+
+        itemRepo.save(item);
+        return true;
+    }
+
+    /* =========================================================
+       REQUIRED BY INTERFACE
+       ========================================================= */
     @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
+            throw new IllegalArgumentException("Invalid quantity");
         }
 
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
         if (!cart.getActive()) {
-            throw new IllegalArgumentException("Cart is inactive");
+            throw new IllegalArgumentException("Cart inactive");
         }
 
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        // Check if item already exists → aggregate quantity
         for (CartItem existing : itemRepo.findAll()) {
             if (existing.getCart().getId().equals(cartId)
                     && existing.getProduct().getId().equals(productId)) {
@@ -56,7 +85,6 @@ public class CartItemServiceImpl implements CartItemService {
             }
         }
 
-        // Create new cart item
         CartItem item = new CartItem();
         item.setCart(cart);
         item.setProduct(product);
@@ -65,14 +93,11 @@ public class CartItemServiceImpl implements CartItemService {
         return itemRepo.save(item);
     }
 
-    /**
-     * REQUIRED BY INTERFACE
-     */
     @Override
     public CartItem updateItem(Long itemId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
+            throw new IllegalArgumentException("Invalid quantity");
         }
 
         CartItem item = itemRepo.findById(itemId)
@@ -82,17 +107,11 @@ public class CartItemServiceImpl implements CartItemService {
         return itemRepo.save(item);
     }
 
-    /**
-     * REQUIRED BY INTERFACE
-     */
     @Override
     public void removeItem(Long itemId) {
         itemRepo.deleteById(itemId);
     }
 
-    /**
-     * REQUIRED BY INTERFACE
-     */
     @Override
     public List<CartItem> getItemsForCart(Long cartId) {
         return itemRepo.findAll()
