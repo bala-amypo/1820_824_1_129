@@ -48,4 +48,11 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .filter(BundleRule::getActive)
                 .toList();
     }
+
+    @Override
+    public void deactivateRule(Long id) {
+        BundleRule rule = getRuleById(id);
+        rule.setActive(false);
+        repo.save(rule);
+    }
 }

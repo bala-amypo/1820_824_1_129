@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -39,11 +40,11 @@ public class DiscountServiceImpl implements DiscountService {
                 .filter(i -> i.getCart().getId().equals(cartId))
                 .toList();
 
-        Map<Long, Integer> quantityByProduct = new HashMap<>();
-        for (CartItem i : items) {
-            quantityByProduct.merge(
-                    i.getProduct().getId(),
-                    i.getQuantity(),
+        Map<Long, Integer> qtyByProduct = new HashMap<>();
+        for (CartItem item : items) {
+            qtyByProduct.merge(
+                    item.getProduct().getId(),
+                    item.getQuantity(),
                     Integer::sum
             );
         }
@@ -53,12 +54,10 @@ public class DiscountServiceImpl implements DiscountService {
         for (BundleRule rule : ruleRepo.findAll()) {
             if (!rule.getActive()) continue;
 
-            String[] requiredIds = rule.getRequiredProductIds().split(",");
             int totalQty = 0;
-
-            for (String pid : requiredIds) {
-                Long id = Long.parseLong(pid.trim());
-                totalQty += quantityByProduct.getOrDefault(id, 0);
+            for (String pid : rule.getRequiredProductIds().split(",")) {
+                Long productId = Long.parseLong(pid.trim());
+                totalQty += qtyByProduct.getOrDefault(productId, 0);
             }
 
             if (totalQty >= rule.getMinQuantity()) {
@@ -78,5 +77,11 @@ public class DiscountServiceImpl implements DiscountService {
         return discountRepo.findAll().stream()
                 .filter(d -> d.getCart().getId().equals(cartId))
                 .toList();
+    }
+
+    @Override
+    public DiscountApplication getApplicationById(Long id) {
+        return discountRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Discount application not found"));
     }
 }
