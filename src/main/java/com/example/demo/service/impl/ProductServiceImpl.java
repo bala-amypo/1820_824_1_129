@@ -6,70 +6,51 @@ import com.example.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository repo;
+    private final ProductRepository productRepository;
 
-    public ProductServiceImpl(ProductRepository repo) {
-        this.repo = repo;
+    public ProductServiceImpl(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
     @Override
     public Product createProduct(Product product) {
-
-        if (repo.findBySku(product.getSku()).isPresent()) {
-            throw new IllegalArgumentException("Duplicate SKU");
+        if (product.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
         }
-
-        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid price");
-        }
-
-        product.setActive(true);
-        return repo.save(product);
+        return productRepository.save(product);
     }
 
     @Override
-    public Product updateProduct(Long id, Product updated) {
-
-        Product existing = repo.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
-
-        if (updated.getPrice() != null &&
-                updated.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid price");
+    public Product updateProductPrice(Long id, double price) {
+        if (price <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
         }
 
-        if (updated.getName() != null) {
-            existing.setName(updated.getName());
-        }
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Product not found"));
 
-        if (updated.getPrice() != null) {
-            existing.setPrice(updated.getPrice());
-        }
-
-        return repo.save(existing);
+        product.setPrice(price);
+        return productRepository.save(product);
     }
 
     @Override
     public Product getProductById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(EntityNotFoundException::new);
-    }
-
-    @Override
-    public List<Product> getAllProducts() {
-        return repo.findAll();
+        return productRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Product not found"));
     }
 
     @Override
     public void deactivateProduct(Long id) {
-        Product p = getProductById(id);
-        p.setActive(false);
-        repo.save(p);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Product not found"));
+
+        product.setActive(false);
+        productRepository.save(product);
     }
 }

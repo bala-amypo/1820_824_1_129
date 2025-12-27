@@ -25,8 +25,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
         }
 
         if (rule.getRequiredProductIds() == null ||
-            rule.getRequiredProductIds().trim().isEmpty() ||
-            rule.getRequiredProductIds().replace(",", "").trim().isEmpty()) {
+            rule.getRequiredProductIds().trim().isEmpty()) {
             throw new IllegalArgumentException("Required products cannot be empty");
         }
 
@@ -35,25 +34,9 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
-    public BundleRule updateRule(Long id, BundleRule updated) {
-
-        BundleRule existing = repo.findById(id)
+    public BundleRule getRuleById(Long id) {
+        return repo.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
-
-        if (updated.getDiscountPercentage() < 1 || updated.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Invalid discount percentage");
-        }
-
-        if (updated.getRequiredProductIds() == null ||
-            updated.getRequiredProductIds().trim().isEmpty() ||
-            updated.getRequiredProductIds().replace(",", "").trim().isEmpty()) {
-            throw new IllegalArgumentException("Required products cannot be empty");
-        }
-
-        existing.setDiscountPercentage(updated.getDiscountPercentage());
-        existing.setRequiredProductIds(updated.getRequiredProductIds());
-
-        return repo.save(existing);
     }
 
     @Override
@@ -62,12 +45,6 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .orElseThrow(IllegalArgumentException::new);
         rule.setActive(false);
         repo.save(rule);
-    }
-
-    @Override
-    public BundleRule getRuleById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
