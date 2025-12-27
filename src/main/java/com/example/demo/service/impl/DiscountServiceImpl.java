@@ -1,65 +1,64 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.model.*;
-import com.example.demo.repository.BundleRuleRepository;
-import com.example.demo.repository.CartItemRepository;
-import com.example.demo.repository.DiscountApplicationRepository;
+import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
 
-    private final BundleRuleRepository ruleRepo;
+    private final CartRepository cartRepo;
     private final CartItemRepository itemRepo;
+    private final BundleRuleRepository ruleRepo;
     private final DiscountApplicationRepository discountRepo;
 
-    public DiscountServiceImpl(BundleRuleRepository ruleRepo,
-                               CartItemRepository itemRepo,
-                               DiscountApplicationRepository discountRepo) {
-        this.ruleRepo = ruleRepo;
+    public DiscountServiceImpl(
+            CartRepository cartRepo,
+            CartItemRepository itemRepo,
+            BundleRuleRepository ruleRepo,
+            DiscountApplicationRepository discountRepo
+    ) {
+        this.cartRepo = cartRepo;
         this.itemRepo = itemRepo;
+        this.ruleRepo = ruleRepo;
         this.discountRepo = discountRepo;
     }
 
     @Override
-    public List<DiscountApplication> evaluateDiscounts(Cart cart) {
-
-        if (!cart.getActive()) return List.of();
-
-        List<CartItem> items = itemRepo.findByCart(cart);
-        Set<Long> productIds = new HashSet<>();
-
-        for (CartItem item : items) {
-            productIds.add(item.getProduct().getId());
+    public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+        Cart cart = cartRepo.findById(cartId).orElse(null);
+        if (cart == null || !cart.isActive()) {
+            return List.of();
         }
 
+        List<CartItem> items = itemRepo.findAll();
+        List<BundleRule> rules = ruleRepo.findAll();
         List<DiscountApplication> applied = new ArrayList<>();
 
-        for (BundleRule rule : ruleRepo.findAll()) {
+        for (BundleRule rule : rules) {
+            boolean match = items.stream()
+                    .filter(i -> i.getCart().getId().equals(cartId))
+                    .count() >= rule.getMinQuantity();
 
-            if (!rule.getActive()) continue;
-
-            String[] required = rule.getRequiredProductIds().split(",");
-
-            boolean matches = true;
-            for (String id : required) {
-                if (!productIds.contains(Long.parseLong(id.trim()))) {
-                    matches = false;
-                    break;
-                }
-            }
-
-            if (matches) {
+            if (match) {
                 DiscountApplication da = new DiscountApplication();
                 da.setCart(cart);
-                da.setRule(rule);
+                da.setBundleRule(rule);
                 applied.add(discountRepo.save(da));
             }
         }
 
         return applied;
+    }
+
+    @Override
+    public List<DiscountApplication> getApplicationsForCart(Long cartId) {
+        return discountRepo.findAll().stream()
+                .filter(d -> d.getCart().getId().equals(cartId))
+                .toList();
     }
 }

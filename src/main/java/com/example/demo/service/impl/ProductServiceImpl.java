@@ -6,6 +6,9 @@ import com.example.demo.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -17,7 +20,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product createProduct(Product product) {
-        if (product.getPrice() <= 0) {
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
         return productRepository.save(product);
@@ -30,26 +33,27 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product product = productRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        product.setPrice(price);
+        product.setPrice(BigDecimal.valueOf(price));
         return productRepository.save(product);
     }
 
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
     }
 
     @Override
     public void deactivateProduct(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Product not found"));
-
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
         product.setActive(false);
         productRepository.save(product);
     }

@@ -3,55 +3,50 @@ package com.example.demo.service.impl;
 import com.example.demo.model.BundleRule;
 import com.example.demo.repository.BundleRuleRepository;
 import com.example.demo.service.BundleRuleService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private final BundleRuleRepository repo;
+    private final BundleRuleRepository bundleRuleRepository;
 
-    public BundleRuleServiceImpl(BundleRuleRepository repo) {
-        this.repo = repo;
+    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
+        this.bundleRuleRepository = bundleRuleRepository;
     }
 
     @Override
     public BundleRule createRule(BundleRule rule) {
-
-        if (rule.getDiscountPercentage() < 1 || rule.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Invalid discount percentage");
+        if (rule.getDiscountPercentage() <= 0 || rule.getDiscountPercentage() > 100) {
+            throw new IllegalArgumentException("Discount must be between 1 and 100");
         }
-
-        if (rule.getRequiredProductIds() == null ||
-            rule.getRequiredProductIds().trim().isEmpty()) {
+        if (rule.getRequiredProductIdsCsv() == null || rule.getRequiredProductIdsCsv().isBlank()) {
             throw new IllegalArgumentException("Required products cannot be empty");
         }
+        return bundleRuleRepository.save(rule);
+    }
 
-        rule.setActive(true);
-        return repo.save(rule);
+    @Override
+    public BundleRule updateRule(Long id, BundleRule rule) {
+        BundleRule existing = getRuleById(id);
+
+        existing.setDiscountPercentage(rule.getDiscountPercentage());
+        existing.setRequiredProductIdsCsv(rule.getRequiredProductIdsCsv());
+        existing.setMinQuantity(rule.getMinQuantity());
+
+        return bundleRuleRepository.save(existing);
     }
 
     @Override
     public BundleRule getRuleById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
+        return bundleRuleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
     }
 
     @Override
-    public void deactivateRule(Long id) {
-        BundleRule rule = repo.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
-        rule.setActive(false);
-        repo.save(rule);
-    }
-
-    @Override
-    public List<BundleRule> getActiveRules() {
-        return repo.findAll()
-                .stream()
-                .filter(BundleRule::getActive)
-                .collect(Collectors.toList());
+    public List<BundleRule> getAllRules() {
+        return bundleRuleRepository.findAll();
     }
 }
