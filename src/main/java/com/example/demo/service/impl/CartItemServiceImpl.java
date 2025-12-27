@@ -36,8 +36,7 @@ public class CartItemServiceImpl implements CartItemService {
                 ci.getProduct().getId().equals(item.getProduct().getId())) {
 
                 ci.setQuantity(ci.getQuantity() + item.getQuantity());
-                itemRepo.save(ci);
-                return true;
+                return itemRepo.save(ci) != null;
             }
         }
 
@@ -46,7 +45,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public void updateItem(Long itemId, Integer quantity) {
+    public CartItem updateItem(Long itemId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Invalid quantity");
@@ -56,7 +55,7 @@ public class CartItemServiceImpl implements CartItemService {
                 .orElseThrow(IllegalArgumentException::new);
 
         item.setQuantity(quantity);
-        itemRepo.save(item);
+        return itemRepo.save(item);
     }
 
     @Override

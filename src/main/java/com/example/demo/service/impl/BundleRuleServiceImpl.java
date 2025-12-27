@@ -21,7 +21,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     public BundleRule createRule(BundleRule rule) {
 
         if (rule.getDiscountPercentage() <= 0 || rule.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Invalid discount");
+            throw new IllegalArgumentException("Invalid discount percentage");
         }
 
         if (rule.getRequiredProductIds() == null || rule.getRequiredProductIds().isBlank()) {
@@ -33,8 +33,32 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
+    public BundleRule updateRule(Long id, BundleRule updated) {
+
+        BundleRule existing = repo.findById(id)
+                .orElseThrow(IllegalArgumentException::new);
+
+        if (updated.getRuleName() != null) {
+            existing.setRuleName(updated.getRuleName());
+        }
+
+        if (updated.getDiscountPercentage() > 0 &&
+            updated.getDiscountPercentage() <= 100) {
+            existing.setDiscountPercentage(updated.getDiscountPercentage());
+        }
+
+        if (updated.getRequiredProductIds() != null &&
+            !updated.getRequiredProductIds().isBlank()) {
+            existing.setRequiredProductIds(updated.getRequiredProductIds());
+        }
+
+        return repo.save(existing);
+    }
+
+    @Override
     public void deactivateRule(Long id) {
-        BundleRule rule = getRuleById(id);
+        BundleRule rule = repo.findById(id)
+                .orElseThrow(IllegalArgumentException::new);
         rule.setActive(false);
         repo.save(rule);
     }

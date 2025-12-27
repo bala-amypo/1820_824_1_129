@@ -11,43 +11,41 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountServiceImpl implements DiscountService {
 
+    private final CartRepository cartRepo;
     private final CartItemRepository itemRepo;
     private final BundleRuleRepository ruleRepo;
     private final DiscountApplicationRepository discountRepo;
-    private final CartRepository cartRepo;
 
-    public DiscountServiceImpl(CartItemRepository itemRepo,
+    public DiscountServiceImpl(CartRepository cartRepo,
+                               CartItemRepository itemRepo,
                                BundleRuleRepository ruleRepo,
-                               DiscountApplicationRepository discountRepo,
-                               CartRepository cartRepo) {
+                               DiscountApplicationRepository discountRepo) {
+        this.cartRepo = cartRepo;
         this.itemRepo = itemRepo;
         this.ruleRepo = ruleRepo;
         this.discountRepo = discountRepo;
-        this.cartRepo = cartRepo;
     }
 
     @Override
-    public List<DiscountApplication> evaluateDiscounts(Cart cart) {
+    public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+
+        Cart cart = cartRepo.findById(cartId)
+                .orElseThrow(IllegalArgumentException::new);
 
         if (!cart.getActive()) {
             return List.of();
         }
 
-        // clear old discounts for cart
-        discountRepo.findAll()
-                .stream()
-                .filter(d -> d.getCart().getId().equals(cart.getId()))
-                .forEach(discountRepo::delete);
-
         Set<Long> productIds = itemRepo.findAll()
                 .stream()
-                .filter(i -> i.getCart().getId().equals(cart.getId()))
+                .filter(i -> i.getCart().getId().equals(cartId))
                 .map(i -> i.getProduct().getId())
                 .collect(Collectors.toSet());
 
-        List<DiscountApplication> result = new ArrayList<>();
+        List<DiscountApplication> applied = new ArrayList<>();
 
         for (BundleRule rule : ruleRepo.findAll()) {
+
             if (!rule.getActive()) continue;
 
             Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
@@ -60,11 +58,11 @@ public class DiscountServiceImpl implements DiscountService {
                 da.setCart(cart);
                 da.setBundleRule(rule);
                 discountRepo.save(da);
-                result.add(da);
+                applied.add(da);
             }
         }
 
-        return result;
+        return applied;
     }
 
     @Override
