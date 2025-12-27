@@ -23,7 +23,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
             throw new IllegalArgumentException("Invalid discount percentage");
         }
         if (rule.getRequiredProductIds() == null ||
-            rule.getRequiredProductIds().isBlank()) {
+                rule.getRequiredProductIds().isBlank()) {
             throw new IllegalArgumentException("Required products cannot be empty");
         }
         rule.setActive(true);
@@ -48,6 +48,14 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     @Override
     public List<BundleRule> getAllRules() {
         return repo.findAll();
+    }
+
+    @Override
+    public List<BundleRule> getActiveRules() {
+        return repo.findAll()
+                .stream()
+                .filter(BundleRule::getActive)
+                .toList();
     }
 
     @Override

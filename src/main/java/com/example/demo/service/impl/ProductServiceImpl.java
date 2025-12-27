@@ -21,10 +21,27 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product createProduct(Product product) {
         if (product.getPrice() == null ||
-            product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be positive");
         }
         return repo.save(product);
+    }
+
+    @Override
+    public Product updateProduct(Long id, Product product) {
+        Product existing = getProductById(id);
+
+        if (product.getPrice() != null &&
+                product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
+        }
+
+        existing.setName(product.getName());
+        existing.setCategory(product.getCategory());
+        existing.setPrice(product.getPrice());
+        existing.setActive(product.getActive());
+
+        return repo.save(existing);
     }
 
     @Override
