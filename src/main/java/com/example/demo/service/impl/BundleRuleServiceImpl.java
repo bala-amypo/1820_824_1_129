@@ -59,11 +59,6 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
-    public List<BundleRule> getAllRules() {
-        return bundleRuleRepository.findAll();
-    }
-
-    @Override
     public List<BundleRule> getActiveRules() {
         return bundleRuleRepository.findAll().stream()
                 .filter(BundleRule::getActive)
