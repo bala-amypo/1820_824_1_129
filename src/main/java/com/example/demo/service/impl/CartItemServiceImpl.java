@@ -10,27 +10,26 @@ import com.example.demo.service.CartItemService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
-    private final CartItemRepository cartItemRepo;
+    private final CartItemRepository itemRepo;
     private final CartRepository cartRepo;
     private final ProductRepository productRepo;
 
     public CartItemServiceImpl(
-            CartItemRepository cartItemRepo,
+            CartItemRepository itemRepo,
             CartRepository cartRepo,
             ProductRepository productRepo
     ) {
-        this.cartItemRepo = cartItemRepo;
+        this.itemRepo = itemRepo;
         this.cartRepo = cartRepo;
         this.productRepo = productRepo;
     }
 
     @Override
     public CartItem addItem(Long cartId, Long productId, Integer quantity) {
+
         if (quantity == null || quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
@@ -38,24 +37,20 @@ public class CartItemServiceImpl implements CartItemService {
         Cart cart = cartRepo.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
 
-        if (!cart.isActive()) {
+        if (!cart.getActive()) {
             throw new IllegalArgumentException("Cart is inactive");
         }
 
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        Optional<CartItem> existing =
-                cartItemRepo.findAll().stream()
-                        .filter(ci ->
-                                ci.getCart().getId().equals(cartId) &&
-                                ci.getProduct().getId().equals(productId))
-                        .findFirst();
+        for (CartItem ci : itemRepo.findAll()) {
+            if (ci.getCart().getId().equals(cartId)
+                    && ci.getProduct().getId().equals(productId)) {
 
-        if (existing.isPresent()) {
-            CartItem item = existing.get();
-            item.setQuantity(item.getQuantity() + quantity);
-            return cartItemRepo.save(item);
+                ci.setQuantity(ci.getQuantity() + quantity);
+                return itemRepo.save(ci);
+            }
         }
 
         CartItem item = new CartItem();
@@ -63,11 +58,11 @@ public class CartItemServiceImpl implements CartItemService {
         item.setProduct(product);
         item.setQuantity(quantity);
 
-        return cartItemRepo.save(item);
+        return itemRepo.save(item);
     }
 
     @Override
     public void removeItem(Long itemId) {
-        cartItemRepo.deleteById(itemId);
+        itemRepo.deleteById(itemId);
     }
 }

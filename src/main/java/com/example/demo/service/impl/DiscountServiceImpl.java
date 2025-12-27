@@ -5,8 +5,8 @@ import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountServiceImpl implements DiscountService {
@@ -30,29 +30,36 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+
         Cart cart = cartRepo.findById(cartId).orElse(null);
-        if (cart == null || !cart.isActive()) {
+        if (cart == null || !cart.getActive()) {
             return List.of();
         }
 
-        List<CartItem> items = itemRepo.findAll();
-        List<BundleRule> rules = ruleRepo.findAll();
-        List<DiscountApplication> applied = new ArrayList<>();
+        Set<Long> productIds = itemRepo.findAll().stream()
+                .filter(i -> i.getCart().getId().equals(cartId))
+                .map(i -> i.getProduct().getId())
+                .collect(Collectors.toSet());
 
-        for (BundleRule rule : rules) {
-            boolean match = items.stream()
-                    .filter(i -> i.getCart().getId().equals(cartId))
-                    .count() >= rule.getMinQuantity();
+        List<DiscountApplication> result = new ArrayList<>();
 
-            if (match) {
+        for (BundleRule rule : ruleRepo.findAll()) {
+            if (!rule.getActive()) continue;
+
+            Set<Long> required = Arrays.stream(rule.getRequiredProductIds().split(","))
+                    .map(String::trim)
+                    .map(Long::valueOf)
+                    .collect(Collectors.toSet());
+
+            if (productIds.containsAll(required)) {
                 DiscountApplication da = new DiscountApplication();
                 da.setCart(cart);
                 da.setBundleRule(rule);
-                applied.add(discountRepo.save(da));
+                result.add(discountRepo.save(da));
             }
         }
 
-        return applied;
+        return result;
     }
 
     @Override

@@ -11,42 +11,51 @@ import java.util.List;
 @Service
 public class BundleRuleServiceImpl implements BundleRuleService {
 
-    private final BundleRuleRepository bundleRuleRepository;
+    private final BundleRuleRepository repo;
 
-    public BundleRuleServiceImpl(BundleRuleRepository bundleRuleRepository) {
-        this.bundleRuleRepository = bundleRuleRepository;
+    public BundleRuleServiceImpl(BundleRuleRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public BundleRule createRule(BundleRule rule) {
-        if (rule.getDiscountPercentage() <= 0 || rule.getDiscountPercentage() > 100) {
-            throw new IllegalArgumentException("Discount must be between 1 and 100");
+        if (!rule.isDiscountPercentageValid()) {
+            throw new IllegalArgumentException("Invalid discount percentage");
         }
-        if (rule.getRequiredProductIdsCsv() == null || rule.getRequiredProductIdsCsv().isBlank()) {
+        if (rule.getRequiredProductIds() == null ||
+            rule.getRequiredProductIds().isBlank()) {
             throw new IllegalArgumentException("Required products cannot be empty");
         }
-        return bundleRuleRepository.save(rule);
+        rule.setActive(true);
+        return repo.save(rule);
     }
 
     @Override
     public BundleRule updateRule(Long id, BundleRule rule) {
         BundleRule existing = getRuleById(id);
 
+        existing.setRuleName(rule.getRuleName());
         existing.setDiscountPercentage(rule.getDiscountPercentage());
-        existing.setRequiredProductIdsCsv(rule.getRequiredProductIdsCsv());
-        existing.setMinQuantity(rule.getMinQuantity());
+        existing.setRequiredProductIds(rule.getRequiredProductIds());
 
-        return bundleRuleRepository.save(existing);
+        return repo.save(existing);
     }
 
     @Override
     public BundleRule getRuleById(Long id) {
-        return bundleRuleRepository.findById(id)
+        return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Bundle rule not found"));
     }
 
     @Override
     public List<BundleRule> getAllRules() {
-        return bundleRuleRepository.findAll();
+        return repo.findAll();
+    }
+
+    @Override
+    public void deactivateRule(Long id) {
+        BundleRule rule = getRuleById(id);
+        rule.setActive(false);
+        repo.save(rule);
     }
 }
