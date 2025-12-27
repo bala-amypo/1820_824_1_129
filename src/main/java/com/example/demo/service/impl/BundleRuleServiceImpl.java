@@ -58,7 +58,7 @@ public class BundleRuleServiceImpl implements BundleRuleService {
                 .toList();
     }
 
-    @Override
+    // ❗ NOT IN INTERFACE → NO @Override
     public void deactivateRule(Long id) {
         BundleRule rule = getRuleById(id);
         rule.setActive(false);
