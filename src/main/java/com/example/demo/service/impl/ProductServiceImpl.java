@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.model.Product;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,8 +25,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Duplicate SKU");
         }
 
-        if (product.getPrice() == null ||
-            product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Invalid price");
         }
 
@@ -36,16 +36,19 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product updateProduct(Long id, Product updated) {
 
-        Product existing = getProductById(id);
+        Product existing = repo.findById(id)
+                .orElseThrow(EntityNotFoundException::new);
+
+        if (updated.getPrice() != null &&
+                updated.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Invalid price");
+        }
 
         if (updated.getName() != null) {
             existing.setName(updated.getName());
         }
 
         if (updated.getPrice() != null) {
-            if (updated.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Invalid price");
-            }
             existing.setPrice(updated.getPrice());
         }
 
@@ -55,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(Long id) {
         return repo.findById(id)
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     @Override
