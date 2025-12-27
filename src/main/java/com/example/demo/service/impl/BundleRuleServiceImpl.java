@@ -53,6 +53,13 @@ public class BundleRuleServiceImpl implements BundleRuleService {
     }
 
     @Override
+    public List<BundleRule> getActiveRules() {
+        return repo.findAll().stream()
+                .filter(BundleRule::getActive)
+                .toList();
+    }
+
+    @Override
     public void deactivateRule(Long id) {
         BundleRule rule = getRuleById(id);
         rule.setActive(false);

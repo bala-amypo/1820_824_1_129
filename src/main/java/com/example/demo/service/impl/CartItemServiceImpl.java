@@ -10,6 +10,8 @@ import com.example.demo.service.CartItemService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CartItemServiceImpl implements CartItemService {
 
@@ -64,5 +66,12 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public void removeItem(Long itemId) {
         itemRepo.deleteById(itemId);
+    }
+
+    @Override
+    public List<CartItem> getItemsForCart(Long cartId) {
+        return itemRepo.findAll().stream()
+                .filter(i -> i.getCart().getId().equals(cartId))
+                .toList();
     }
 }

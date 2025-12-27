@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DiscountService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -60,6 +61,12 @@ public class DiscountServiceImpl implements DiscountService {
         }
 
         return result;
+    }
+
+    @Override
+    public DiscountApplication getApplicationById(Long id) {
+        return discountRepo.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Discount application not found"));
     }
 
     @Override
