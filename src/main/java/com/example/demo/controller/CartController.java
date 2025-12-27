@@ -2,37 +2,25 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Cart;
 import com.example.demo.service.CartService;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carts")
-@Tag(name = "Carts")
 public class CartController {
-
     private final CartService cartService;
-
+    
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-
-    @PostMapping("/{userId}")
-    public Cart create(@PathVariable Long userId) {
-        return cartService.createCart(userId);
+    
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<Cart> createCart(@PathVariable Long userId) {
+        return ResponseEntity.ok(cartService.createCart(userId));
     }
-
-    @GetMapping("/{id}")
-    public Cart get(@PathVariable Long id) {
-        return cartService.getCartById(id);
-    }
-
+    
     @GetMapping("/user/{userId}")
-    public Cart getByUser(@PathVariable Long userId) {
-        return cartService.getCartByUserId(userId);
-    }
-
-    @PutMapping("/{id}/deactivate")
-    public void deactivate(@PathVariable Long id) {
-        cartService.deactivateCart(id);
+    public ResponseEntity<Cart> getActiveCart(@PathVariable Long userId) {
+        return ResponseEntity.ok(cartService.getActiveCartForUser(userId));
     }
 }
