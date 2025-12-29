@@ -14,12 +14,9 @@ public class Product {
     private String sku;
 
     private String name;
-
     private BigDecimal price;
-
     private Boolean active = true;
 
-    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

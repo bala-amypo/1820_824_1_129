@@ -3,9 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.model.Cart;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.service.CartService;
-
 import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.stereotype.Service;
 
 @Service
