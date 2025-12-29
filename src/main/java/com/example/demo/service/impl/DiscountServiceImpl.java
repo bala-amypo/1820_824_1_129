@@ -1,72 +1,36 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.DiscountApplication;
+import com.example.demo.repository.DiscountApplicationRepository;
+import com.example.demo.service.DiscountService;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
 
-public class DiscountServiceImpl {
+import java.util.List;
 
-    private final DiscountApplicationRepository discountRepo;
-    private final BundleRuleRepository ruleRepo;
-    private final CartRepository cartRepo;
-    private final CartItemRepository itemRepo;
+@Service
+public class DiscountServiceImpl implements DiscountService {
 
-    public DiscountServiceImpl(
-            DiscountApplicationRepository discountRepo,
-            BundleRuleRepository ruleRepo,
-            CartRepository cartRepo,
-            CartItemRepository itemRepo) {
+    private final DiscountApplicationRepository discountRepository;
 
-        this.discountRepo = discountRepo;
-        this.ruleRepo = ruleRepo;
-        this.cartRepo = cartRepo;
-        this.itemRepo = itemRepo;
+    public DiscountServiceImpl(DiscountApplicationRepository discountRepository) {
+        this.discountRepository = discountRepository;
     }
 
+    @Override
     public List<DiscountApplication> evaluateDiscounts(Long cartId) {
+        return discountRepository.findByCartId(cartId);
+    }
 
-        Cart cart = cartRepo.findById(cartId).orElse(null);
-        if (cart == null || !cart.getActive()) return List.of();
+    @Override
+    public DiscountApplication getApplicationById(Long id) {
+        return discountRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("DiscountApplication not found"));
+    }
 
-        List<CartItem> items = itemRepo.findByCartId(cartId);
-        if (items.isEmpty()) return List.of();
-
-        discountRepo.deleteByCartId(cartId);
-
-        Set<Long> productIds = new HashSet<>();
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (CartItem ci : items) {
-            productIds.add(ci.getProduct().getId());
-            total = total.add(
-                    ci.getProduct().getPrice()
-                            .multiply(BigDecimal.valueOf(ci.getQuantity()))
-            );
-        }
-
-        List<DiscountApplication> result = new ArrayList<>();
-
-        for (BundleRule rule : ruleRepo.findByActiveTrue()) {
-            Set<Long> required = new HashSet<>();
-            for (String s : rule.getRequiredProductIds().split(",")) {
-                required.add(Long.parseLong(s.trim()));
-            }
-
-            if (productIds.containsAll(required)) {
-                DiscountApplication da = new DiscountApplication();
-                da.setCart(cart);
-                da.setBundleRule(rule);
-                da.setAppliedAt(LocalDateTime.now());
-                da.setDiscountAmount(
-                        total.multiply(
-                                BigDecimal.valueOf(rule.getDiscountPercentage() / 100))
-                );
-                result.add(discountRepo.save(da));
-            }
-        }
-        return result;
+    @Override
+    public List<DiscountApplication> getApplicationsForCart(Long cartId) {
+        return discountRepository.findByCartId(cartId);
     }
 }
