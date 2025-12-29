@@ -20,15 +20,14 @@ public class CartServiceImpl implements CartService {
         if (cartRepository.findByUserIdAndActiveTrue(userId).isPresent()) {
             throw new IllegalArgumentException("Cart already exists");
         }
-        Cart cart = new Cart();
-        cart.setUserId(userId);
-        return cartRepository.save(cart);
+        Cart c = new Cart();
+        c.setUserId(userId);
+        return cartRepository.save(c);
     }
 
     @Override
     public Cart getActiveCartForUser(Long userId) {
         return cartRepository.findByUserIdAndActiveTrue(userId)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Active cart not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Active cart not found"));
     }
 }

@@ -14,13 +14,13 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @PostMapping("/user/{userId}")
-    public Cart createCart(@PathVariable Long userId) {
+    @PostMapping("/{userId}")
+    public Cart create(@PathVariable Long userId) {
         return cartService.createCart(userId);
     }
 
-    @GetMapping("/user/{userId}")
-    public Cart getActiveCart(@PathVariable Long userId) {
+    @GetMapping("/{userId}")
+    public Cart get(@PathVariable Long userId) {
         return cartService.getActiveCartForUser(userId);
     }
 }
