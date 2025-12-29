@@ -3,7 +3,6 @@ package com.example.demo.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -18,24 +17,32 @@ public class OpenApiConfig {
         SecurityScheme bearerAuth = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
-                .bearerFormat("JWT");
+                .bearerFormat("JWT")
+                .in(SecurityScheme.In.HEADER)
+                .name("Authorization");
 
-        Server server = new Server()
+        Server remoteServer = new Server()
                 .url("https://9024.32procr.amypo.ai/")
-                .description("Production Server");
+                .description("Remote Dev Server");
+
+        Server localServer = new Server()
+                .url("http://localhost:8080")
+                .description("Local Server");
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("E-Commerce Bundle API")
+                        .title("E-Commerce Bundle & Save API")
                         .version("1.0")
-                        .description("API for managing products, carts, and bundle discounts")
+                        .description(
+                                "Secure REST API with JWT authentication, " +
+                                "role-based authorization, and bundle discount logic"
+                        )
                 )
-                .addServersItem(server)
-                .addSecurityItem(
-                        new SecurityRequirement().addList("bearerAuth")
-                )
+                .addServersItem(remoteServer)
+                .addServersItem(localServer)
                 .components(
-                        new Components().addSecuritySchemes("bearerAuth", bearerAuth)
+                        new Components()
+                                .addSecuritySchemes("bearerAuth", bearerAuth)
                 );
     }
 }
