@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
-    // Enforce one cart per user
     Optional<Cart> findByUserId(Long userId);
+
+    Optional<Cart> findByUserIdAndActiveTrue(Long userId);
 }

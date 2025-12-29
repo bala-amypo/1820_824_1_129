@@ -8,6 +8,7 @@ import java.util.List;
 public interface DiscountApplicationRepository
         extends JpaRepository<DiscountApplication, Long> {
 
-    // Fetch all discount records for a cart
     List<DiscountApplication> findByCartId(Long cartId);
+
+    void deleteByCartId(Long cartId);
 }
