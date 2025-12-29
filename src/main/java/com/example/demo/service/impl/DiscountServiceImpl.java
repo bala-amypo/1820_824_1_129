@@ -7,6 +7,9 @@ import com.example.demo.service.DiscountService;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.*;
+import org.springframework.stereotype.Service;
+
+@Service
 
 public class DiscountServiceImpl implements DiscountService {
 

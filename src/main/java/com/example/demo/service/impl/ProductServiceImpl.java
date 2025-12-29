@@ -6,6 +6,9 @@ import com.example.demo.service.ProductService;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.springframework.stereotype.Service;
+
+@Service
 
 public class ProductServiceImpl implements ProductService {
 

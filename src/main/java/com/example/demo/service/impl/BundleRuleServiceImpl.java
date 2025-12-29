@@ -6,6 +6,9 @@ import com.example.demo.service.BundleRuleService;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import org.springframework.stereotype.Service;
+
+@Service
 
 public class BundleRuleServiceImpl implements BundleRuleService {
 
