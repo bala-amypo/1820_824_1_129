@@ -1,9 +1,8 @@
 package com.example.demo.security;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
+import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -11,7 +10,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String secret = "very-secret-key-change-me";
+    private final String secret = "demo-secret-key-123456";
     private final long validityInMs = 3600000; // 1 hour
 
     public String generateToken(String email, String role, Long userId) {
@@ -29,14 +28,5 @@ public class JwtTokenProvider {
                 .setExpiration(expiry)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }
