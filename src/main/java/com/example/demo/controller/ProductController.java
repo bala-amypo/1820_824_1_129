@@ -2,36 +2,57 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Product;
 import com.example.demo.service.ProductService;
-import org.springframework.http.ResponseEntity;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@Tag(name = "Products", description = "Product management APIs")
+@PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
 public class ProductController {
+
     private final ProductService productService;
-    
+
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-    
+
+    @Operation(summary = "Create a new product")
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-        return ResponseEntity.ok(productService.createProduct(product));
+    public Product createProduct(@RequestBody Product product) {
+        return productService.createProduct(product);
     }
-    
+
+    @Operation(summary = "Update product details")
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return ResponseEntity.ok(productService.updateProduct(id, product));
+    public Product updateProduct(
+            @PathVariable Long id,
+            @RequestBody Product product) {
+
+        return productService.updateProduct(id, product);
     }
-    
+
+    @Operation(summary = "Get product by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.getProductById(id));
+    public Product getProduct(@PathVariable Long id) {
+        return productService.getProductById(id);
     }
-    
+
+    @Operation(summary = "List all products")
+    @GetMapping
+    public List<Product> getAllProducts() {
+        return productService.getAllProducts();
+    }
+
+    @Operation(summary = "Deactivate a product")
     @PutMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivateProduct(@PathVariable Long id) {
+    public void deactivateProduct(@PathVariable Long id) {
         productService.deactivateProduct(id);
-        return ResponseEntity.ok().build();
     }
 }
