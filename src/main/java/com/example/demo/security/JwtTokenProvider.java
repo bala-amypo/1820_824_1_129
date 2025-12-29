@@ -11,7 +11,6 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(String email, String role, Long userId) {
-        // Tests mock this method, real JWT logic not required
         return "jwt-token";
     }
 
