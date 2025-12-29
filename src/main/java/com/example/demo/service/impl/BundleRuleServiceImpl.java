@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
-
 public class BundleRuleServiceImpl implements BundleRuleService {
 
     private final BundleRuleRepository bundleRuleRepository;

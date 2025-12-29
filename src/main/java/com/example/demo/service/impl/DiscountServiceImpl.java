@@ -10,7 +10,6 @@ import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
-
 public class DiscountServiceImpl implements DiscountService {
 
     private final DiscountApplicationRepository discountRepository;

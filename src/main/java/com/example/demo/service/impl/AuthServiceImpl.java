@@ -6,19 +6,19 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.AuthService;
+
+import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // Constructor Injection ONLY
     public AuthServiceImpl(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
@@ -43,7 +43,6 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        // Auto-login after register (nice demo touch)
         return jwtTokenProvider.generateToken(
                 user.getEmail(),
                 user.getRole(),
