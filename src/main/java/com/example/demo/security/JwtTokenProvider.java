@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import java.security.Key;
 import java.util.Date;
 
 import org.springframework.stereotype.Component;
@@ -7,27 +8,30 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtTokenProvider {
 
-    private final String jwtSecret = "secretKey";
-    private final long jwtExpirationMs = 86400000;
+    // ✅ Proper 256-bit key for HS256
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    private final long jwtExpirationMs = 86400000; // 1 day
 
     // ==============================
-    // Used by TESTS (1 argument)
+    // Used by tests
     // ==============================
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .signWith(key)
                 .compact();
     }
 
     // ==============================
-    // Used by AuthServiceImpl (3 arguments)
+    // Used by AuthServiceImpl
     // ==============================
     public String generateToken(String email, String role, Long userId) {
 
@@ -39,14 +43,15 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .signWith(key)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                .setSigningKey(jwtSecret)
+            Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
