@@ -14,9 +14,29 @@ public class JwtTokenProvider {
     private final String jwtSecret = "secretKey";
     private final long jwtExpirationMs = 86400000;
 
-    public String generateToken(String username) {
+    // ==============================
+    // Used by TESTS (1 argument)
+    // ==============================
+    public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .compact();
+    }
+
+    // ==============================
+    // Used by AuthServiceImpl (3 arguments)
+    // ==============================
+    public String generateToken(String email, String role, Long userId) {
+
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("role", role);
+        claims.put("userId", userId);
+
+        return Jwts.builder()
+                .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
@@ -32,13 +52,5 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
     }
 }
